@@ -4,7 +4,8 @@
 This program and its accompanying suite of tools and libraries are designed to facilitate [knowledge representation and reasoning](https://en.wikipedia.org/wiki/Knowledge_representation_and_reasoning).
 It is based on research performed at the [University of Ottawa](https://www.uottawa.ca/en) Language Analysis and Knowledge Engineering laboratory ([LAKE Lab](http://www.site.uottawa.ca/~tcl/factguru1)).
 A suitably formalized knowledge representation is a necessary first step towards creating shared [Ontologies](https://en.wikipedia.org/wiki/Ontology) for use by people and [artificial intelligence](https://en.wikipedia.org/wiki/Artificial_intelligence) systems.
-The current knowledge representation framework is based on frames and the ClearTalk [controlled natural language](https://en.wikipedia.org/wiki/Controlled_natural_language).
+The current knowledge representation framework is based on [frames](https://en.wikipedia.org/wiki/Frame_(artificial_intelligence) 
+and the ClearTalk [controlled natural language](https://en.wikipedia.org/wiki/Controlled_natural_language).
 The knowledge bases created by the framework are designed to be interoperable with the [semantic web](https://www.w3.org/standards/semanticweb) as defined by the W3C.
 
 ## References
