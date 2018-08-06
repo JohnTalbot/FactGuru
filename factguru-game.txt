@@ -1,0 +1,509 @@
+software: FactGuru Game
+software category: Serious Games
+summary: Combining AI with VR to disrupt education
+document type: Design Document
+author: John Talbot
+date: 2013-09-28, 
+amended: 2015-02-19, 2015-08-27
+URL: http://factguru.com
+
+primary purpose: 
+
+  Leveraging the true power of artificial intelligence (AI) in virtual reality (VR) educational games.
+  AI is used by the Ontologist to develop both the educational content and the virtual environment.
+  The resulting Ontology is then used by the game programmer to vastly simplify game design and development.
+
+secondary purpose:
+  1. To familiarize the user with focus fusion technology and the promise it holds for solving all our energy problems.
+  2. To teach the scientific method via an example in astrophysics : The thesis that belief is stronger than reason
+     is exemplified using the Laser Star Theory, a Nobel Prize-winning model of quasars.
+
+stealth learning:
+  educational materials presented non-traditionally (e.g. gradually) so that the user does not
+  immediately recognized they are being taught. The user gradually uncovers portions of the Ontology
+  as they progress in the game via the game 'mechanics'. Ultimately the user learns to appreciate the
+  benefits of AI and virtual reality in their educational development.
+
+virtual reality:
+  computer generated 3D environment, artifacts and computer mediated interactions with user
+
+artificial intelligence:
+  Knowledge represented as an Ontology.
+  Ontology semantically linked to virtual reality such that first order logic mediates both user and programmer interactions with environment and artifacts.
+  Knowledge base augmented with pedagogical learning threads (pedagogical markup knowledge about knowledge, a kind of metadata)
+  (i.e. users can create their own threads depending on their interests)
+  Users and programmers have identical capabilities except for publishing and internet sharing
+  Linguistic minimalism.
+
+Implemetation
+  concept, relationship, fact
+
+graphical user interface:
+  Graphs, Tree Views and Tables in 3D VR
+
+---------------------------------------------------
+
+    Implementation of primary purpose:
+
+---------------------------------------------------
+
+knowledge base structure, knowledge encoding formats
+  SysML, UML, XMI parser-interpreter controls the simulation of scientific instrument artifacts
+  FactGuru text import
+  conceptual graphs
+  Python, C++, Java
+  Unreal Engine 4 Blueprints
+  Open Source Robotics Framework
+
+ 
+design:
+  SysML, UML
+  
+design tool:
+Visual Paradigm for UML Professional v14.2, Blender v2.79, Autodesk Maya 2018, Epic Games Unreal Engine 4.18.3, 
+Microsoft Visual Studio 2015 Community Edition Version 15.5.6, Allegorithmic Substance Designer 6, Substance Painter 2 and Bitmap2Materials3,
+Open Graph Drawing Framework v.2015.05 (Baobab), Native Intruments KOMPLETE 11 ULTIMATE, Cubase 8.5
+  
+design sharing:
+  GitHub
+
+implementation:
+  1. C++ with full round trip UML and marked up with Unreal macros
+  2. Ontology
+
+design details:
+  Systems engineering is used to model scenarios, environments, artifacts and processes.
+  User interactions with environment, artifacts and processes is the basis for the game.
+
+design goal:
+  - PROBLEM: Create a separation of concerns between the low level C++ and the knowledge base.
+  - SOLUTION: Use the Ontology to simultaneously describe both the knowledge and the game implementation details.
+      1. Users can browse the knowledge independently of game implementation details
+      2. Programmers enter knowledge into the Ontology instead of C++ programming
+         (a) add to the world by creating geometrical content in UDK, Blender or Maya
+         (b) associate geometrical content with physics knowledge in the Ontology
+         (c) associate geometrical content with game implementation details in the Ontology
+
+—————————————————————————
+
+Ontology-based educational game: 
+
+  Physical model maps directly to the conceptual model. Various physical phenomena share
+  a common subset of fundamental physical behaviors this leads to the following problem: 
+
+  PROBLEM
+  (1) Fact: In standard educational materials each document must duplicate this common set. 
+      Consequence: Students waste time sifting though this re-introduced material for new knowledge.
+  
+  (2) Fact: Differing fields of study have different terminology for common topics.
+      Consequence: Students are confused by the myriad of synonyms as they study different fields. 
+      
+  (3) Fact: Documents refer to other documents.
+      Consequence: Students waste time searching and aquiring these linked documents. 
+        Students waste money aquiring documents that are paywalled or only available
+        at bookstores.
+        
+  (4) Fact: Relationships between concepts are not obvious, they are scattered within the documents.
+      Consequence: Student must digest all the materials before these relationships emerge. 
+  
+  SOLUTION:  
+  (1) The Ontology facilitates the sharing of this commonality by having a central location
+      for the storage of this knowledge. Subject, topic or fact in the Ontology can have
+      an associated personalized boolean 'visited' value (similar to alternate link color of visited web pages).  
+      In addition, each subject, topic or fact can store the user's personalized proficiency
+      level indicating their level of mastery in the associated subject matter.
+      
+  (2) Unified terminology; Preferred terms are chosen and synonyms are avoided.
+  
+  (3) The need for external reference is dramatically reduced since most of the required
+      knowlegde is contained in the Ontology therefore most reference links are internal.
+
+  (4) Graphs make the relationships between concepts immediately obvious.
+
+Serious Games:
+
+Leverage the compelling, fascinating nature of games and positive psychology :
+irresistible alluring appealing captivating charming delightful enchanting engaging engrossing
+glamorous gripping intriguing riveting bewitching enticing ravishing seducing attractive delectable 
+reference: Reality is Broken and SuperBetter (Jane McGonigal )  ISBN: 
+
+Montessori Education:
+
+"Education for a New World" Conference given by Maria Montessori in New Delhi, India (1943)
+Montessori-Pierson Publishing Company
+Kalakshetra Publicationss
+http://en.wikipedia.org/wiki/Montessori_education
+
+Isaas Asimov baseball analogy : Steps for seeking higher learning
+http://en.wikipedia.org/wiki/Isaac_Asimov
+
+Karen Effect : a maximum of interactivity, Fisher-Price busy box (robotics)
+
+Foundations of Physics: 
+Empirical methodology is a part of the scientific method
+The Big Bang Never Happened (Eric Lerner 1992) ISBN: 067974049X
+http://www.amazon.com/Big-Bang-Never-Happened-Refutation/dp/067974049X
+http://en.wikipedia.org/wiki/Methodology
+http://en.wikipedia.org/wiki/Empiricism
+http://en.wikipedia.org/wiki/Scientific_method
+
+====== Conceptual Model ==========
+
+The physical models such as environment, artifact or process are mapped to conceptual models contained in a knowledge base (Ontology)
+
+Knowledge base structure :
+
+- Each concept or topic has :
+  - Definition
+  - Facts
+  - Relationships with other concepts or topics
+
+- Each concept, topic or fact has :
+  - Topic(s) under which they are classified
+  - Level-of-detail
+      This value represents succesively more detailed exposition, the inverted pyramid technique used by reporters
+      Purpose:
+         1 - A thresold to reduce clutter when browsing
+         2 - Optionality value so users can select an upper bound on the level-of-detail
+         3 - The threshold can be set automatically based on user age, educational backgroud or learning progression rate (as they 'level-up') 
+
+- Presentation and navigation methods :
+    Each concept, topic or fact can have multiple level-of-detail values associated with each
+    presentation method below :
+
+  - a select set of important facts and inherited facts
+  - a select set of super-concepts and sub-concepts as links
+  - a select set of parts and part-of facts
+  - top level concepts first and progressively deeper in kinds and parts 
+  - Instances first and and progressively more general super concepts
+  - thread or tutorial : pedagogical sequence of topics, concepts or facts
+  - ?? limit exposition by automatically assigning a lower level-of-detail value to each succesive link traversed (indirection threshold)
+  - topic hierarchy
+  - parts hierarchy
+  - the sun graph display mode
+  
+---------------------------------------------------
+
+    Implementation of secondary purposes:
+
+---------------------------------------------------
+
+There is a beneficial synergy between phenomena in nature and in experiment:
+  (a) NATURE: observation of nature
+       - like an uncontrolled experiment with a set of parameters. Some parameters are known some unkown.
+  (b) EXPERIMENT: experiments in laboratories
+       - many parameters can be chosen for each experimental run
+       - can model or reproduce a naturally occuring phenomena
+
+The phenomena to be studied are analyzed into a hierachy of fundamental physical behaviors
+each associated with experimental apparatus. The Ontology Level-of-detail value
+for each experiment contributes to the smooth and gradual progression of learning.
+
+1. Focus fusion
+---------------
+   (a) NATURE: Plasma filaments in space (aurora, solar filaments and flares)
+   (b) EXPERIMENT: Plasma focus
+   
+  1. observation
+    1. Aurora
+    2. Solar prominence
+    3. Solar flare
+  2. Maxwell's equations
+    1. current
+    2. charge
+    3. Faraday's law of induction
+    4. electric fields
+    5. magnetic fields
+  3. collective plasma phenomena
+    1. exploding double layers
+    2. force-free filaments
+    3. 3D PIC simulation
+  4. fusion
+    1. aneutronic
+    2. neutron producing
+    3. tokamac
+    4. inertial confinement
+    5. focus fusion   
+
+2. Belief is stronger than reason : Laser star astrophysics
+-----------------------------------------------------------
+   (a) NATURE: Laser Stars (quasars, cpn, Wolf-Rayet stars) 
+   (b) EXPERIMENT: Industrial UV and X-Ray plasma lasers
+   
+  1. observation, experimental results and simulations
+    1. quasars, cpn, Wolf-Rayet star spectra (openEXR for HDR spectra)
+    2. Collisional-Radiative simulation
+  2. laser action
+    1. stimulated emission
+    2. spontaneous emission
+    3. population inversion
+    4. amplified spontaneous emmission
+  3. plasma
+    1. static: ionization and excitation balance at a given temperature and density
+    2. dynamic: adiabatic expansion cooling thermodynamics
+    3. dynamic: contact cooled
+    4. classification
+      1. recombining
+      2. collisionaly excited (Nova-laser generates x-ray laser)
+      3. ionizing
+      4. decaying
+  4. applications
+     1. industrial uv and x-ray plasma lasers
+     2. diagnostics for fusion plasma
+    
+================= Physical Model ======================
+
+Levels or phases of exploration are modeled using the empirical methodoly
+  
+1. Physical World
+    1. Environment | has part | artifact | -has cardinality: zero or more
+                   | has part | process | -has cardinality: zero or more
+        1. natural 
+          1. celestial object
+          2. space
+        2. artificial
+          1. facility
+          2. floor
+          3. elevator or lift
+          4. corridor
+          5. room  
+
+    2. Artifact
+        1. experimental device
+           1. power supply
+           2. electronics
+           3. sensor
+           4. active volume location (where physical phenomena take place)
+        2. poster
+        3. tool, equipment
+           1. tricorder
+           2. tablet
+           3. 
+    3. Process
+        1. Natural process
+        2. Experiment          
+           
+2. Experiment operation
+
+3. Experiment results
+
+4. Formulate a model which reproduces the results
+
+=================== Virtual Reality : Action Model ============================
+
+The user or robot can interact (or perform actions) with (1) environment (2) artifact or (3) process
+
+1. Environment Action
+  change location
+  
+  location
+    artificial location
+      spacecraft
+      satellite
+      transporter
+      facilitie
+      corridor
+      room
+    natural location
+      celestial body
+        galaxy
+        star
+        planet
+        asteroid
+      space
+      orbit
+        hyperbolic
+        parabolic
+        elliptical
+        three body
+      surface
+        continent
+        island
+        body of water
+          sea
+          ocean
+          lake
+          river
+        crater
+        marea
+  
+2. Artifact Action
+    locate
+    create-destroy
+    move
+    operate
+    assemble composite artifact from two or more artifacts 
+    disassemble composite artifact
+    connect artifact to artifact (connected artifacts don't combine to create a composite artifact)
+    disconnect artifact from artifact
+    destroy
+    recycle
+      
+3. Process Action
+    high level process
+      run experiment
+      observe natural phenomena
+    mid-level process (more than two particle)      
+      thermodynamics       
+    low level process
+      creation-anihilation
+      collision
+      transition
+      propagation
+      molecule formation-dissociation
+
+
+-----------------------------------------------------
+environment: (locations which user can be on or inside)
+            | has part | environment (for composition) | -has cardinality: zero or more
+
+celestial body
+  planet 
+    Earth
+    Mars
+  satellite
+    Moon
+    Phobos
+    Deimos
+  asteroid
+    Vesta
+
+geological formation
+  continent
+  mountain
+    volcano
+  crater
+  island
+  cave
+  sub-oceanic
+
+facility
+  university
+  laboratory
+  institution
+  corporation
+  outpost
+  orbital station
+room
+  laboratory room
+  classroom
+  meeting room
+  supply room
+  operations room
+  decompression room
+  virtual set : (a kind of virtual reality within the game's virtual reality)
+
+-------------------------------------------------------
+artifact:
+
+artifact
+  composite artifact : a kind of artifact which is composed of other artifacts (can be assembled or disasembled)
+    experiment
+    energy generation
+    matter generation
+      mining
+      extraction
+        distilation
+        filtering 
+  container
+    test tube
+  connector : a kind of artifact which connects zero or more artifacts together
+    tube
+    cable
+    
+utility (a kind of resource flow composed of energy or matter. Can be represented as a SysML port)
+  energy
+    free-space
+    waveguided
+    electricity
+      alernating
+      direct current
+      electron beam
+      electron flow over conductors
+    photon
+      microwave
+      laser
+  matter
+    cryogenic
+    liquid
+      water
+    gas
+      hydrogen
+      helium
+    solid
+    plasma
+    
+vehicle
+    dynamic
+      transporter
+    static
+      two body orbit
+      three body orbit
+         Lagrange point
+--------------------------------------------
+process:
+
+  interaction process | is a kind of | process
+                      | has definition | a kind of process which involves user interaction or user action in the game
+  physical process | is a kind of | process
+                   | has definition | a kind of process which involves one or more laws of physics
+  experiment
+  phenomenon   | has definition | http://en.wikipedia.org/wiki/Phenomenon
+               | has definition | what is experienced is the basis of reality
+               | has plural | phenomena
+  collision
+  thermodynamic
+  chemistry
+
+--------------------------------------------------
+scenario | is a kind of | 
+         | has definition | container for environment with zero or more artifact and zero or more process
+         | has part | environment
+         | has part | artifact | -has cardinality: zero or more
+         | has part | process | -has cardinality: zero or more
+         | has part | person | -has cardinality: zero or more       
+         | has location | 
+         | has time |
+         | has topic |
+         | has educational thread | ordered collection of facts about certain concepts
+         
+  2D scenario | is a kind of | scenario  
+              | has definition | Software displaying and discussing experimental results, theories or facts mostly two dimensions with some 3D graphs
+  
+  3D scenario | is a kind of | scenario
+              | has definition | A kind of scenario which is represented within a virtual reality
+              | has representation | virtual reality
+              | has implementation | virtual reality implementation
+              | has part | 2D scenario | -has cardinality: zero or more
+
+    science fiction | is a kind of | 3D scenario
+                    | has part (environment) | facility, laboratory
+                    | has part (artifact) | vehicles and technical instrumentation 
+                    | has part (person) | astronaut, engineer, worker, scientist, politician
+                    | has location | space, moon, planet
+                    | has time | future
+   
+    historical | is a kind of | 3D scenario
+               | has part (artifact) | instrument of discovery
+               | has part (person) | scientist or author of discovery
+               | has location | historically accurate location of discovery
+               | time | time of discovery
+   
+    ordinary daily life | is a kind of | 3D scenario
+                        | has part (artifact) | educational tools (blackboard, whiteboard, experimental demonstration)
+                        | has part (person) | teacher
+                        | has location | variable
+                        | has time | present
+
+
+virtual reality implementation options
+  Unreal
+  Crysis
+  Unity
+
+---------------------------------------------------
+
+References:
+http://www.site.uottawa.ca:4321/
+http://laserstars.org
+http://en.wikipedia.org/wiki/Learner-generated_context
