@@ -1,0 +1,441 @@
+# filename: BungeOntologyClearTalk
+# purpose: Bunge Ontology in ClearTalk format
+# method: Translation of UML XMI file Bunge_v5.nodiagram.xml to ClearTalk from the Bunge Ontology in Evermann (2009) 
+# author: John Talbot
+# date: 2018-08-12
+# license: Distributed under the terms of the GNU General Public License version 3 or any later version.
+# References: 
+#   1. Joerg Evermann (2009): Software & Systems Modeling, Vol. 8 pp. 235-249. A UML and OWL description of Bunge’s upper-level ontology model. https://joerg.evermann.ca/software.html
+#   2. Bunge, M.A. (1977): Ontology I: The Furniture of the World. Volume 3 of Treatise On Basic Philosophy. D. Reidel, Dordrecht.
+#   3. Bunge, M.A. (1979): Ontology II: A World of Systems. Volume 4 of Treatise On Basic Philosophy. D. Reidel, Dordrecht.
+#
+
+BungeOntologyConcept | is a kind of | kbTop
+
+UML Concept | is a kind of | kbTop
+    AssociationClass | is a kind of | UML Concept
+    UMLStereotype | is a kinb of | UML Concept
+        Singleton | is a kind of | UMLStereotype
+
+Interaction | is a kind of | BungeOntologyConcept
+            | has a set of | Action | -hasMultiplicity: 2 -hasAggregation: shared
+            | has reference | Definitions 5.30, 5.31&#10;&#10;Total interaction is the union of the total action and the total reaction of two things
+
+Action | is a kind of | BungeOntologyConcept
+       | has a set of | Interaction | -hasMultiplicity: 0..*
+       | has a | Bond
+       | has an actor | Thing
+       | has an actee | Thing
+       | has reference | Defintion 5.31&#10;Postulate 5.10
+
+    Input | is a kind of | Action
+          | has an | Environment
+    
+    Output | is a kind of | Action
+           | has an | Environment
+
+Process | is a kind of | BungeOntologyConcept
+        | has an ordered set of | LawfulEvent | -hasMultiplicity: 1..* -hasAggregation: shared
+        | has reference | Definition 5.24
+
+    CompositeFunctionalEvent | is a kind of | Process
+                             | is a kind of | CompositeEvent
+                             | has first | LawfulEvent | -hasAggregation: shared -hasReference: Definition 5.10
+                             | has second | LawfulEvent | -hasAggregation: shared -hasReference: Definition 5.10                         
+                             | has reference | Definition 5.10
+
+Change | is a kind of | BungeOntologyConcept
+       | has a | LawfulStateSpace
+       | has a | ReferenceFrame | -hasMultiplicity: 0..* -hasAssociationClass: Coordinatization
+       | has reference | Definition 5.2
+
+    QualitativeChange | is a kind of | Change
+                      | has a | QuantitativeChange | -hasMultiplicity: 0..1 -hasReference: Corollary 5.2 (pg. 220)
+                      | has reference | Definition 5.3
+    
+    QuantitativeChange | is a kind of | Change
+                       | has a | QualitativeChange | -hasMultiplicity: 0..1
+                       | has reference | Definition 5.3
+
+    Event | is a kind of | Change
+          | fromState | State
+          | toState | State
+          | has a set of | EventSpace | -hasMultiplicity: 1..*
+          | has a set of | CompositeEvent | -hasMultiplicity: 0..*
+          | has a set of | CompositeEvent | -hasMultiplicity: 0..* 
+          | has synonym | NetChange     
+          | has reference | Equivalent to NetChange&#10;Definition 5.4
+    
+        CompositeEvent | is a kind of | Event
+                       | has first | Event | -hasAggregation: shared -hasReference: Definition 5.4
+                       | has second | Event | -hasAggregation: shared -hasReference: Definition 5.4
+                       | has reference | Equivalent to CompositeEvent&#10;Equivalent to Complex Event&#10;Definition 5.6
+    
+LawfulEvent | is a kind of | CompositeFunctionalEvent
+            | is a kind of | Event
+            | has a set of | CompositeFunctionalEvent | -hasMultiplicity: 0..*
+            | has a set of | CompositeFunctionalEvent | -hasMultiplicity: 0..*
+            | has a set of | Process association | -hasMultiplicity: 0..*
+            | has a set of | LawfulEventSpace | -hasMultiplicity: 1..*
+            | has a set of | LawfulTransformation | -hasMultiplicity: 0..*           
+            | has reference | Principle 5.3&#10;Also called functional change in Principle 5.3&#10;Also called lawful event in Definition 5.9 (pg 230)
+
+EventSpace | is a kind of | BungeOntologyConcept
+           | has a set of | Event | -hasMultiplicity: 1..* -hasAggregation: shared
+           | has reference | Definition 5.4
+
+    LawfulEventSpace | is a kind of | EventSpace
+                     | has a set of | LawfulEvent | -hasMultiplicity: 1..* -hasAggregation: shared
+                     | has reference | Definition 5.9 (pg 230)
+
+LawfulTransformation | is a kind of | BungeOntologyConcept
+                     | has a set of | LawfulEvent | -hasMultiplicity: 1..*
+                     | on state space | LawfulStateSpace        
+                     | has reference | Definition 5.8
+
+ValueOfTotalStateFunction | is a kind of | BungeOntologyConcept
+                          | has a | FunctionalSchema
+                          | represents a | State | -hasReference: Definition 3.9
+                          | has a set of | FunctionValue | -hasMultiplicity: 1..* -hasAggregation: shared
+
+FunctionalSchema | is a kind of | BungeOntologyConcept
+                 | has amount of structure | Float
+                 | has a set of | ValueOfTotalStateFunction | -hasMultiplicity: 1..*
+                 | has included state a set of | State | -hasMultiplicity: 1..* -hasReference: Definition 3.9
+                 | has function a set of | StateFunction | -hasMultiplicity: 1..* -hasAggregation: shared
+                 | describes a set of | Thing | -hasMultiplicity: 1..* -hasAssociation: ModelOf
+                 | has synonym | Model
+                 | has synonym | Model Thing             
+                 | has reference | Definition 3.6&#10;Also called Model or Model Thing
+
+State | is a kind of | BungeOntologyConcept
+      | is defined by | ValueOfTotalStateFunction
+      | has a | FunctionalSchema
+      | has a set of | Event | -hasMultiplicity: 0..* -hasReference: Principle 5.2
+      | has a set of | Event | -hasMultiplicity: 0..*-hasReference: Principle 5.2
+      | has a set of | ConceivableStateSpace | -hasMultiplicity: 1..*
+      | has reference | Definition 3.9
+
+StateFunction | is a kind of | BungeOntologyConcept
+              | in a set of Schema | FunctionalSchema | -hasMultiplicity: 1..* -hasReference: Definition 3.6
+              | has a | Domain
+              | has reference | Definition 3.6
+              | has a set of assumed values | FunctionValue | -hasMultiplicity: 1..*
+              | has a | Co-Domain
+              | has an | IndividualProperty
+              | has a | LawStatement | -hasReference: Definition 3.10 (pg. 129)&#10;Criterion 2.2 (pg. 79)
+
+Domain | is a kind of | BungeOntologyConcept
+       | has a set of | StateFunction | -hasMultiplicity: 0..*
+       | has a | FunctionValue | -hasAggregation: shared
+       | has reference | Definition 3.6&#10;Also page 125: &quot;Unlike the F, which are prperty representing variables (or rather functions), f and t are not variables. They are arbitrary members of certain sets (F and T respectively) and they are not possessed by any thing in particular: on the contrary, they are rather public in the sense that they can be &quot;used&quot; by a number of things.&quot;
+
+FunctionValue | is a kind of | BungeOntologyConcept
+              | of function set of | StateFunction | -hasMultiplicity: 0..*
+              | has a | Domain
+              | has a set of | ValueOfTotalStateFunction | -hasMultiplicity: 1..*
+              | has reference | Also called assumed value&#10;Definition 3.9&#10;Chapter 3, Section 2.2, pg 125f&#10;
+
+LawfulState | is a kind of | BungeOntologyConcept
+            | has reference | Definition 3.11
+            
+Co-Domain | is a kind of | BungeOntologyConcept
+          | has a set of | StateFunction | -hasMultiplicity: 0..*
+          | has a set of | Value | -hasMultiplicity: 1..* -hasAggregation: shared
+          | has a set of | ConceivableStateSpace | -hasMultiplicity: 0..*
+          | has reference | Also called Range&#10;Definition 3.6
+
+ConceivableStateSpace | is a kind of | BungeOntologyConcept
+                      | has a set of | State | -hasMultiplicity: 2..* -hasAggregation: shared
+                      | has a set of | Co-Domain | -hasMultiplicity: 1..*
+                      | has reference | Chapter 3, pg. 133f&#10;The conceivable state space was modelled even though it was not introduced by Bunge in a formal definition. This allows us to introduce the idea that state spaces are spanned by the co-domains of state functions of functional schemata.&#10;The lawful state space is a conceivable state space that is constrained by law statements.
+
+    LawfulStateSpace | is a kind of | ConceivableStateSpace
+                     | has included state a set of | LawfulState | -hasMultiplicity: 2..* -hasAggregation: shared
+                     | has a set of | LawfulTransformation | -hasMultiplicity: 0..* -hasReference: Definition 5.8 (pg. 227)
+                     | has a set of | Change | -hasMultiplicity: 1..* -hasReference: Definition 5.2 (pg. 219)&#10;Also features in Definition 5.3 (pg. 220)
+                     | has a set of | LawStatement | -hasMultiplicity: 1..*
+                     | has a | History
+                     | has reference | Definition 3.11
+
+Value | is a kind of | BungeOntologyConcept
+      | has a set of | Co-Domain | -hasMultiplicity: 0..*
+
+Property | is a kind of | BungeOntologyConcept
+         | has reference | Chapter 2, Section 1.1&#10;Chapter 2, Section 3&#10;Definition 2.2
+         | has a set of | PropertyWeight | -hasMultiplicity: 0..*
+         | has a set of weights | PropertyWeight | -hasMultiplicity: 0..*
+         | has a set of | ComplexProperty | -hasMultiplicity: 0..*
+         | has a | ResultantProperty | -hasReference: Resulting from properties of the parts of a composite
+         | has a set of | Property | -hasMultiplicity: 0..* -hasAssociation: IncompatibleWith -hasReference: Comment Chapter 2, Definition 2.4
+         | has a set of | Property | -hasMultiplicity: 0..* -hasAssociation: IncompatibleWith -hasReference: Comment Chapter 2, Definition 2.4
+         | is preceeding a set of | Property | -hasMultiplicity: 0..* -hasAssociationClass: PrecedenceLaw
+         | is preceeded by a set of | Property | -hasMultiplicity: 0..* -hasAssociationClass: PrecedenceLaw
+         | defines a set of | Kind | -hasMultiplicity: 0..*
+         | has a set of | Class | -hasMultiplicity: 0..*
+         | posseses a set of | Thing | -hasMultiplicity: 1..* -hasReference: Chapter 2, Section 3.1&#10;Chapter 3, Definition 3.1&#10;Chapter 2, Definition 2.5&#10;Chapter 2, Definition 2.17
+
+    ComplexProperty | is a kind of | Property | -hasUMLConstraint: {complete, disjoint} -hasGeneralizationSet: ComplexBasicProperties
+                    | is disjoint from | BasicProperty
+                    | forms a complete covering generalization set with | BasicProperty | -hasGeneralizationSet: ComplexBasicProperties
+                    | has composition a set of | Property | -hasMultiplicity: 2..*
+                    | has reference | Chapter 2, Postulate 2.8, Corollary 2.1
+    
+    BasicProperty | is a kind of | Property | -hasUMLConstraint: {complete, disjoint} -hasGeneralizationSet: ComplexBasicProperties
+                  | is disjoint from | ComplexProperty
+                  | forms a complete covering generalization set with | ComplexProperty | -hasGeneralizationSet: ComplexBasicProperties
+                  | has reference | Chapter 2, Postulate 2.8
+
+    IndividualProperty | is a kind of | Property | -hasUMLConstraint: {complete, disjoint} -hasGeneralizationSet: GeneralIndividualProperty
+                       | is disjoint from | PropertyInGeneral
+                       | forms a complete covering generalization set with | PropertyInGeneral | -hasGeneralizationSet: GeneralIndividualProperty
+                       | has a set of | StateFunction | -hasMultiplicity: 0..*
+                       | has value of | Attribute
+                       | has a | PropertyInGeneral
+                       | posseses a set of | Thing | -hasMultiplicity: 1..*
+                       | has reference | Also called Property in Particular&#10;Also called Individual Property&#10;Chapter 2, Postulate 2.1
+    
+    PropertyInGeneral | is a kind of | Property | -hasUMLConstraint: {complete, disjoint} -hasGeneralizationSet: GeneralIndividualProperty
+                      | is disjoint from | IndividualProperty
+                      | forms a complete covering generalization set with | IndividualProperty | -hasGeneralizationSet: GeneralIndividualProperty
+                      | is observed as a set of | IndividualProperty | -hasMultiplicity: 0..*
+                      | is represented by a set of | Attribute | -hasMultiplicity: 0..*
+                      | has reference | Postulate 2.1
+
+    IntrinsicProperty | is a kind of | Property | -hasUMLConstraint: {complete, disjoint} -hasGeneralizationSet: MutualIntrinsicProperty
+                      | is disjoint from | MutualProperty
+                      | forms a complete covering generalization set with | MutualProperty | -hasGeneralizationSet: MutualIntrinsicProperty 
+                      | has a | Thing    
+                      | has reference | Chapter 2, Section 2.2
+
+    EmergentProperty | is a kind of | Property
+                     | has a set of | CompositeThing | -hasMultiplicity: 1..*
+                     | has reference | Chapter 2, Definition 2.16&#10;Also called gestalt property
+    
+    ResultantProperty | is a kind of | Property
+                      | has a | Property
+                      | resulting in a set of | CompositeThing | -hasMultiplicity: 0..*
+                      | has reference | Also called Hereditary Property&#10;Chapter 2, Definition 2.16
+
+    MutualProperty | is a kind of | Property | -hasUMLConstraint: {complete, disjoint} -hasGeneralizationSet: MutualIntrinsicProperty
+                   | is disjoint from | IntrinsicProperty
+                   | forms a complete covering generalization set with | IntrinsicProperty | -hasGeneralizationSet: MutualIntrinsicProperty
+                   | has a set of | Thing | -hasMultiplicity: 2..*
+                   | has reference | Chapter 2, Section 2.2&#10;Postulate 2.2
+    
+        BindingProperty | is a kind of | MutualProperty | -hasUMLConstraint: {complete, disjoint} -hasGeneralizationSet: BindingNonBindingProperty
+                        | is disjoint from | NonBindingProperty
+                        | forms a complete covering generalization set with | NonBindingProperty | -hasGeneralizationSet: BindingNonBindingProperty
+        
+        NonBindingProperty | is a kind of | MutualProperty | -hasUMLConstraint: {complete, disjoint} -hasGeneralizationSet: BindingNonBindingProperty
+                           | is disjoint from | BindingProperty
+                           | forms a complete covering generalization set with | BindingProperty | -hasGeneralizationSet: BindingNonBindingProperty
+
+Attribute | is a kind of | BungeOntologyConcept
+          | has a set of values | IndividualProperty | -hasMultiplicity: 1..*
+          | has reference | Chapter 2, Section 1.2&#10;Especially pg. 60&#10;Question: Is this the same as a state function? (Postulate 2.1)&#10;Chapter 3, Section 1.3 (pg. 116)
+          | represents | PropertyInGeneral
+
+ReferenceFrame | is a kind of | BungeOntologyConcept
+               | has set of | Change | -hasMultiplicity: 0..1 -hasAssociationClass: Coordinatization
+               | has reference | Definition 5.11&#10;Rule 6.1
+
+Coordinatization | is a kind of | AssociationClass
+                 | has RelativeRateOfChange | Float
+                 | has RelativeExtentOfChange | Float
+                 | has GlobalRateOfChange | Float
+                 | has GlobalExtentOfChange | Float
+                 | has reference | Definition 5.11
+
+PropertyWeight | is a kind of | BungeOntologyConcept
+               | has weight | Float
+               | with respect to | Property
+               | weight of | Property
+               | has reference | Chapter 2, Definition 2.15
+
+PrecedenceLaw | is a kind of | AssociationClass
+              | is expressed by a set of | LawStatement | -hasMultiplicity: 0..*
+              | is associated with | preceeding-preceeded Property of class Property
+ 
+Kind | is a kind of | BungeOntologyConcept
+     | has a set of defining properties | Property | -hasMultiplicity: 2..*
+     | has extension a set of | Thing | -hasMultiplicity: 1..* -hasAggregation: shared -hasReference: Definition 3.1
+     | has reference | Definition 3.17
+
+    Class | is a kind of | Kind
+          | has a defining property | Property
+          | has reference | Chapter 2, Definition 2.6&#10;Definition 3.14'>
+
+    NaturalKind | is a kind of | Kind
+                | has a | LawStatement 
+                | has reference | Definition 3.21&#10;Equivalent to Species
+    
+        NaturalGenus | is a kind of | NaturalKind
+                     | has a | BasicLaw
+
+Individual | is a kind of | BungeOntologyConcept
+           | has a set of | CompositeIndividual | -hasMultiplicity: 0..* -hasReference: From Definition 1.2
+           | has a | WorldInvidual
+           | has a set of | Individual | -hasMultiplicity: 0..* -hasAssociationClass: IndividualJuxtaposition
+           | has a set of | Individual | -hasMultiplicity: 0..* -hasAssociationClass: IndividualJuxtaposition
+           | has a set of | Individual | -hasMultiplicity: 0..* -hasAssociationClass: IndividualSuperposition
+           | has a set of | Individual | -hasMultiplicity: 0..* -hasAssociationClass: IndividualSuperposition
+           | has reference | Substance (Chapter 1)
+
+    Thing | is a kind of | Individual
+          | has reference | Chapter 3, Definition 3.1
+          | has a set of | Property | -hasMultiplicity: 1..*
+          | has a set of | MutualProperty | -hasMultiplicity: 1..*
+          | is described by a set of | FunctionalSchema | -hasMultiplicity: 0..* -hasAssociation: ModelOf
+          | has a set of | IntrinsicProperty | -hasMultiplicity: 0..*
+          | has a set of | Thing | -hasMultiplicity: 0..* -hasAssociationClass: ThingJuxtaposition
+          | has a set of | Thing | -hasMultiplicity: 0..* -hasAssociationClass: ThingJuxtaposition
+          | has a set of | Kind | -hasMultiplicity: 1..*
+          | has a | WorldThing
+          | is a part of a set of | CompositeThing | -hasMultiplicity: 0..* -hasAssociation: Composition
+          | has a set of | IndividualProperty | -hasMultiplicity: 1..*
+          | has a set of | LawStatement  | -hasMultiplicity: 1..*
+          | has a | History
+          | has a set of | Level | -hasMultiplicity: 1..*
+          | has a set of | Composition | -hasMultiplicity: 0..*
+          | is the environment of a set of | System | -hasMultiplicity: 0..*
+          | has a set of | Action | -hasMultiplicity: 1..*
+          | has a set of | Action | -hasMultiplicity: 1..*
+
+    IndividualSuperposition | is a kind of | Individual
+                            | is a kind of | AssociationClass
+                            | has reference | Postulate 1.5
+                            | has association | has a set of Individual in the Individual class
+
+    SimpleIndividual | is a kind of | Individual
+                     | has reference | From Definition 1.1
+
+        BasicThing | is a kind of | SimpleIndividual
+                   | is a kind of | Thing | -hasUMLConstraint: {complete, disjoint} -hasGeneralizationSet: BasicCompositeThing
+                   | is disjoint from | CompositeThing
+                   | forms a complete covering generalization set with | CompositeThing | -hasGeneralizationSet: BasicCompositeThing
+                   | has reference | From Definition 3.4 (pg. 114)
+
+        NullIndividual | is a kind of | SimpleIndividual
+                       | is a kind of | Singleton
+                       | has reference | Postulate 1.1&#10;Corollary 1.1
+                       
+            NullThing | is a kind of | BasicThing
+                      | is a kind of | NullIndividual
+                      | is a kind of | Singleton
+                      | has reference | Postulate 3.2                       
+
+    CompositeIndividual | is a kind of | Individual
+                        | has a set of | Individual | -hasMultiplicity: 2..* -hasAggregation: shared
+                        | has complexity | Integer
+                        | has reference | From Definition 1.1
+
+        IndividualJuxtaposition | is a kind of | CompositeIndividual | -has reference: Definition 1.10
+                                | is a kind of | AssociationClass   
+                                | is a kind of | CompositeThing
+                                | has association | has a set of Individual in Individual class
+                                | has reference | Postulate 1.5&#10;Definition 1.10'>
+
+            ThingJuxtaposition | is a kind of | IndividualJuxtaposition
+                               | is a kind of | AssociationClass
+                               | has reference | Chapter 3, Definition 3.3&#10;Chapter 3, Definition 3.4
+                               | has association | has a set of Thing in the Thing class
+
+        WorldInvidual | is a kind of | CompositeIndividual
+                      | is a kind of | Singleton
+                      | has a set of | Individual | -hasMultiplicity: 1..* -hasAggregation: shared
+                      | has reference | Postulate 1.2&#10;Definition 1.3
+
+        CompositeThing | is a kind of | CompositeIndividual
+                       | is a kind of | Thing | -hasUMLConstraint: {complete, disjoint} -hasGeneralizationSet: BasicCompositeThing
+                       | is disjoint from | BasicThing
+                       | forms a complete covering generalization set with | BasicThing | -hasGeneralizationSet: BasicCompositeThing
+                       | posseses a set of | EmergentProperty | -hasMultiplicity: 1..*
+                       | has a set of | ResultantProperty | -hasMultiplicity: 0..*
+                       | has parts a set of | Thing | -hasMultiplicity: 2..* -hasAggretation: shared  -hasAssociation: Composition
+                       | has reference | From Definition 3.4 (pg. 114)
+
+            System | is a kind of | CompositeThing
+                   | has subSystem a set of | System | -hasMultiplicity: 0..* -hasReference: Bunge Volume 4, Definition 1.6 -hasAssociation: SystemHierarchy
+                   | has superSystem a set of | System | -hasMultiplicity: 0..* -hasReference: Bunge Volume 4, Definition 1.6 -hasAssociation: SystemHierarchy
+                   | is embedded in | Environment
+                   | has property | Structure
+                   | has property | Bondage
+                   | has a set of | Composition | -hasMultiplicity: 0..*
+                   | has environment a set of | Thing | -hasMultiplicity: 0..* -hasReference: Bunge Volume 4, Definition 1.4&#10;
+                   | has reference | Definition 5.35&#10;Corollary 5.14&#10;Corollary 5.15
+
+            WorldThing | is a kind of | CompositeThing
+                       | is a kind of | System
+                       | is a kind of | Singleton
+                       | has a set of | Thing | -hasMultiplicity: 1..* -hasAggregation: shared
+                       | has reference | Postulate 3.3
+
+LawStatement | is a kind of | BungeOntologyConcept
+             | expresses a set of | PrecedenceLaw | -hasMultiplicity: 1..*
+             | defines a set of | LawfulStateSpace | -hasMultiplicity: 0..* -hasReference: Definition 3.11
+             | has a defining set of | NaturalKind | -hasMultiplicity: 0..*
+             | has a governing set of | Thing | -hasMultiplicity: 1..*
+             | has a  | StateFunction
+             | has reference | Definition 3.10
+
+    DerivedLaw | is a kind of | LawStatement | -hasUMLConstraint: {complete, disjoint} -hasGeneralizationSet: BasicDerivedLaw
+               | is disjoint with | BasicLaw
+               | forms a complete covering generalization set with | BasicLaw | -hasGeneralizationSet: BasicDerivedLaw
+    
+    BasicLaw | is a kind of | LawStatement | -hasUMLConstraint: {complete, disjoint} -hasGeneralizationSet: BasicDerivedLaw
+             | is disjoint with | DerivedLaw
+             | forms a complete covering generalization set with | DerivedLaw | -hasGeneralizationSet: BasicDerivedLaw
+             | has a set of | NaturalGenus | -hasMultiplicity: 0..*
+
+History | is a kind of | BungeOntologyConcept
+        | has a | LawfulStateSpace
+        | has a | Thing
+        | has a set of | LawfulState | -hasMultiplicity: 1..* -hasAggregation: shared
+        | has reference | Definition 5.27
+
+Level | is a kind of | BungeOntologyConcept
+      | has a set of | Thing | -hasMultiplicity: 1..* -hasAggregation: shared
+      | has a superLevel | Level | -hasAssociation: LevelStructure
+      | has a set of subLevels | Level | -hasMultiplicity: 0..* -hasAssociation: LevelStructure
+      | has reference | Definition 1.8
+
+Composition | is a kind of | BungeOntologyConcept
+            | has a set of | Thing | -hasMultiplicity: 1..* -hasAggregation: shared
+            | has a | System
+            | has reference | Bunge Volume 4, Definition 1.4&#10;Called A-Composition in Bunge
+
+Environment | is a kind of | BungeOntologyConcept
+            | has a set of | Thing | -hasMultiplicity: 0..* -hasAggregation: shared
+            | interacts with | System
+            | has | Input
+            | has | Output
+            | has synonym | A-Environment
+            | has reference | Bunge Volume 4, Definition 1.2&#10;Called A-Environment in Bunge
+
+Structure | is a kind of | BungeOntologyConcept
+          | is a property of a | System
+          | has a set of | Bond | -hasMultiplicity: 1..* -hasAggregation: shared
+          | has reference | Bunge Volume 4, Definition 1.4&#10;Set of Bonds&#10;Called A-Structure in Bunge
+
+Bond | is a kind of | BungeOntologyConcept
+     | is a part of a | Structure
+     | has an | Action
+     | has a set of | Bondage | -hasMultiplicity: 1..*
+     | has reference | Definition 5.32&#10;Definition 5.33&#10;
+
+Bondage | is a kind of | BungeOntologyConcept
+        | has a set of | Bond | -hasMultiplicity: 1..* -hasAggregation: shared
+        | is a property of a | System
+        | has synonym | internal A-Structure
+        | has reference | Definition 5.33&#10;Also called internal A-Structure, Definition 1.6 (Volume 4)
+
+   
+    
+
+
+
+
+
+    
+
