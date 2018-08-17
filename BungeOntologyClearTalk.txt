@@ -359,7 +359,7 @@ Individual | is a kind of | BungeOntologyConcept
                                | has reference | Chapter 3, Definition 3.3&#10;Chapter 3, Definition 3.4
                                | has association | has a set of Thing in the Thing class
 
-        WorldInvidual | is a kind of | CompositeIndividual
+        WorldIndividual | is a kind of | CompositeIndividual
                       | is a kind of | Singleton
                       | has a set of | Individual | -hasMultiplicity: 1..* -hasAggregation: shared
                       | has reference | Postulate 1.2&#10;Definition 1.3
@@ -368,7 +368,7 @@ Individual | is a kind of | BungeOntologyConcept
                        | is a kind of | Thing | -hasUMLConstraint: {complete, disjoint} -hasGeneralizationSet: BasicCompositeThing
                        | is disjoint from | BasicThing
                        | forms a complete covering generalization set with | BasicThing | -hasGeneralizationSet: BasicCompositeThing
-                       | posseses a set of | EmergentProperty | -hasMultiplicity: 1..*
+                       | possesses a set of | EmergentProperty | -hasMultiplicity: 1..*
                        | has a set of | ResultantProperty | -hasMultiplicity: 0..*
                        | has parts a set of | Thing | -hasMultiplicity: 2..* -hasAggretation: shared  -hasAssociation: Composition
                        | has reference | From Definition 3.4 (pg. 114)
