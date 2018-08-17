@@ -8,7 +8,7 @@
 #   1. Joerg Evermann (2009): Software & Systems Modeling, Vol. 8 pp. 235-249. A UML and OWL description of Bunge’s upper-level ontology model. https://joerg.evermann.ca/software.html
 #   2. Bunge, M.A. (1977): Ontology I: The Furniture of the World. Volume 3 of Treatise On Basic Philosophy. D. Reidel, Dordrecht.
 #   3. Bunge, M.A. (1979): Ontology II: A World of Systems. Volume 4 of Treatise On Basic Philosophy. D. Reidel, Dordrecht.
-#
+#   4. Bunge, M.A. (2003): Philosopical Dictionary - Enlarged Edition, 330p ISBN: 1591020379 Lib.Congress.: B791.B765_2002
 
 BungeOntologyConcept | is a kind of | kbTop
 
@@ -22,6 +22,7 @@ Interaction | is a kind of | BungeOntologyConcept
             | has reference | Definitions 5.30, 5.31&#10;&#10;Total interaction is the union of the total action and the total reaction of two things
 
 Action | is a kind of | BungeOntologyConcept
+       | has definition | What one thing does to another | -hasReference: Philosopical Dictionary - Enlarged Edition (M.Bunge 2003)330p 1591020379 B791.B765_2002
        | has a set of | Interaction | -hasMultiplicity: 0..*
        | has a | Bond
        | has an actor | Thing
@@ -35,6 +36,7 @@ Action | is a kind of | BungeOntologyConcept
            | has an | Environment
 
 Process | is a kind of | BungeOntologyConcept
+        | has definition | A sequence of states of a concrete (material) thing | -hasReference: Philosopical Dictionary - Enlarged Edition (M.Bunge 2003)330p 1591020379 B791.B765_2002
         | has an ordered set of | LawfulEvent | -hasMultiplicity: 1..* -hasAggregation: shared
         | has reference | Definition 5.24
 
@@ -45,19 +47,26 @@ Process | is a kind of | BungeOntologyConcept
                              | has reference | Definition 5.10
 
 Change | is a kind of | BungeOntologyConcept
+       | has definition | Any alteration or variation in one or more properties of a thing | -hasReference: Philosopical Dictionary - Enlarged Edition (M.Bunge 2003)330p 1591020379 B791.B765_2002
        | has a | LawfulStateSpace
        | has a | ReferenceFrame | -hasMultiplicity: 0..* -hasAssociationClass: Coordinatization
        | has reference | Definition 5.2
 
     QualitativeChange | is a kind of | Change
+                      | has definition | the emergence or submergence of one or more properties of a thing | -hasReference: Philosopical Dictionary - Enlarged Edition (M.Bunge 2003)330p 1591020379 B791.B765_2002
+                      | has examples | "creation" and "annihilation" of electron pairs; transmutation of atomic nuclei; chemical combinations and dissociations; birth and death of organisms | -hasReference: Philosopical Dictionary - Enlarged Edition (M.Bunge 2003)330p 1591020379 B791.B765_2002
                       | has a | QuantitativeChange | -hasMultiplicity: 0..1 -hasReference: Corollary 5.2 (pg. 220)
                       | has reference | Definition 5.3
     
     QuantitativeChange | is a kind of | Change
+                       | has definition | change in the value of one or more properties | -hasReference: Philosopical Dictionary - Enlarged Edition (M.Bunge 2003)330p 1591020379 B791.B765_2002
+                       | has examples | motion, accretion, population increase | -hasReference: Philosopical Dictionary - Enlarged Edition (M.Bunge 2003)330p 1591020379 B791.B765_2002
                        | has a | QualitativeChange | -hasMultiplicity: 0..1
                        | has reference | Definition 5.3
 
     Event | is a kind of | Change
+          | has definition | A change in a single step | -hasReference: Philosopical Dictionary - Enlarged Edition (M.Bunge 2003)330p 1591020379 B791.B765_2002
+          | has example | quantum jump (if indeed there is such) | -hasReference: Philosopical Dictionary - Enlarged Edition (M.Bunge 2003)330p 1591020379 B791.B765_2002
           | fromState | State
           | toState | State
           | has a set of | EventSpace | -hasMultiplicity: 1..*
@@ -109,6 +118,8 @@ FunctionalSchema | is a kind of | BungeOntologyConcept
                  | has reference | Definition 3.6&#10;Also called Model or Model Thing
 
 State | is a kind of | BungeOntologyConcept
+      | has definition | The state a concrete thing is in at a given instant, and relative to a given reference frame, is the totality of its properties at that time and relative to that frame | -hasReference: Philosopical Dictionary - Enlarged Edition (M.Bunge 2003)330p 1591020379 B791.B765_2002
+      | is representable by | a particular value of a StateFunction | -hasReference: Philosopical Dictionary - Enlarged Edition (M.Bunge 2003)330p 1591020379 B791.B765_2002
       | is defined by | ValueOfTotalStateFunction
       | has a | FunctionalSchema
       | has a set of | Event | -hasMultiplicity: 0..* -hasReference: Principle 5.2
@@ -117,6 +128,7 @@ State | is a kind of | BungeOntologyConcept
       | has reference | Definition 3.9
 
 StateFunction | is a kind of | BungeOntologyConcept
+              | has definition | A function whose values represent the possible states of a concrete entity | -hasReference: Philosopical Dictionary - Enlarged Edition (M.Bunge 2003)330p 1591020379 B791.B765_2002
               | in a set of Schema | FunctionalSchema | -hasMultiplicity: 1..* -hasReference: Definition 3.6
               | has a | Domain
               | has reference | Definition 3.6
@@ -146,6 +158,7 @@ Co-Domain | is a kind of | BungeOntologyConcept
           | has reference | Also called Range&#10;Definition 3.6
 
 ConceivableStateSpace | is a kind of | BungeOntologyConcept
+                      | has definition | The set of all states that the things of some kind can be in: the space spanned (swept) by a StateFunction | -hasReference: Philosopical Dictionary - Enlarged Edition (M.Bunge 2003)330p 1591020379 B791.B765_2002
                       | has a set of | State | -hasMultiplicity: 2..* -hasAggregation: shared
                       | has a set of | Co-Domain | -hasMultiplicity: 1..*
                       | has reference | Chapter 3, pg. 133f&#10;The conceivable state space was modelled even though it was not introduced by Bunge in a formal definition. This allows us to introduce the idea that state spaces are spanned by the co-domains of state functions of functional schemata.&#10;The lawful state space is a conceivable state space that is constrained by law statements.
@@ -162,6 +175,7 @@ Value | is a kind of | BungeOntologyConcept
       | has a set of | Co-Domain | -hasMultiplicity: 0..*
 
 Property | is a kind of | BungeOntologyConcept
+         | has definition | Feature, trait, or characteristic possessed by some object, conceptual or material | -hasReference: Philosopical Dictionary - Enlarged Edition (M.Bunge 2003)330p 1591020379 B791.B765_2002
          | has reference | Chapter 2, Section 1.1&#10;Chapter 2, Section 3&#10;Definition 2.2
          | has a set of | PropertyWeight | -hasMultiplicity: 0..*
          | has a set of weights | PropertyWeight | -hasMultiplicity: 0..*
@@ -232,6 +246,7 @@ Property | is a kind of | BungeOntologyConcept
                            | forms a complete covering generalization set with | BindingProperty | -hasGeneralizationSet: BindingNonBindingProperty
 
 Attribute | is a kind of | BungeOntologyConcept
+          | has definition | Predicate, i.e., function from individuals of some kind to propositions | -hasReference: Philosopical Dictionary - Enlarged Edition (M.Bunge 2003)330p 1591020379 B791.B765_2002
           | has a set of values | IndividualProperty | -hasMultiplicity: 1..*
           | has reference | Chapter 2, Section 1.2&#10;Especially pg. 60&#10;Question: Is this the same as a state function? (Postulate 2.1)&#10;Chapter 3, Section 1.3 (pg. 116)
           | represents | PropertyInGeneral
@@ -263,15 +278,17 @@ Kind | is a kind of | BungeOntologyConcept
      | has reference | Definition 3.17
 
     Class | is a kind of | Kind
+          | has definition | Collection (in particular set) defined by a (simple or complex) predicate | -hasReference: Philosopical Dictionary - Enlarged Edition (M.Bunge 2003)330p 1591020379 B791.B765_2002
           | has a defining property | Property
           | has reference | Chapter 2, Definition 2.6&#10;Definition 3.14'>
 
     NaturalKind | is a kind of | Kind
-                | has a | LawStatement 
+                | is defined by a | LawStatement 
+                | has definition | A collection that, far from being arbitrary, is defined by a property or a law | -hasReference: Philosopical Dictionary - Enlarged Edition (M.Bunge 2003)330p 1591020379 B791.B765_2002
                 | has reference | Definition 3.21&#10;Equivalent to Species
     
         NaturalGenus | is a kind of | NaturalKind
-                     | has a | BasicLaw
+                     | is defined by a | BasicLaw
 
 Individual | is a kind of | BungeOntologyConcept
            | has a set of | CompositeIndividual | -hasMultiplicity: 0..* -hasReference: From Definition 1.2
@@ -283,6 +300,7 @@ Individual | is a kind of | BungeOntologyConcept
            | has reference | Substance (Chapter 1)
 
     Thing | is a kind of | Individual
+          | has definition | An object other than a construct | -hasReference: Philosopical Dictionary - Enlarged Edition (M.Bunge 2003)330p 1591020379 B791.B765_2002
           | has reference | Chapter 3, Definition 3.1
           | has a set of | Property | -hasMultiplicity: 1..*
           | has a set of | MutualProperty | -hasMultiplicity: 1..*
@@ -356,6 +374,7 @@ Individual | is a kind of | BungeOntologyConcept
                        | has reference | From Definition 3.4 (pg. 114)
 
             System | is a kind of | CompositeThing
+                   | has definition | Complex object every part or component of which is related to at least one other component | -hasReference: Philosopical Dictionary - Enlarged Edition (M.Bunge 2003)330p 1591020379 B791.B765_2002
                    | has subSystem a set of | System | -hasMultiplicity: 0..* -hasReference: Bunge Volume 4, Definition 1.6 -hasAssociation: SystemHierarchy
                    | has superSystem a set of | System | -hasMultiplicity: 0..* -hasReference: Bunge Volume 4, Definition 1.6 -hasAssociation: SystemHierarchy
                    | is embedded in | Environment
@@ -395,12 +414,15 @@ History | is a kind of | BungeOntologyConcept
         | has reference | Definition 5.27
 
 Level | is a kind of | BungeOntologyConcept
+      | has definition | an integrative level, or level of organization of reality, is a collection of material (concrete) entities that share certain properties and laws | -hasReference: Philosopical Dictionary - Enlarged Edition (M.Bunge 2003)330p 1591020379 B791.B765_2002
       | has a set of | Thing | -hasMultiplicity: 1..* -hasAggregation: shared
       | has a superLevel | Level | -hasAssociation: LevelStructure
       | has a set of subLevels | Level | -hasMultiplicity: 0..* -hasAssociation: LevelStructure
       | has reference | Definition 1.8
 
 Composition | is a kind of | BungeOntologyConcept
+            | has definition | The collection of parts of a system | -hasReference: Philosopical Dictionary - Enlarged Edition (M.Bunge 2003)330p 1591020379 B791.B765_2002
+            | has level | Since a system may have parts on several levels (e.g., atoms, molecules, cells, organs, persons, etc.), it is necessary to indicate the level at which the composition is being thought of. | -hasReference: Philosopical Dictionary - Enlarged Edition (M.Bunge 2003)330p 1591020379 B791.B765_2002
             | has a set of | Thing | -hasMultiplicity: 1..* -hasAggregation: shared
             | has a | System
             | has reference | Bunge Volume 4, Definition 1.4&#10;Called A-Composition in Bunge
@@ -413,12 +435,14 @@ Environment | is a kind of | BungeOntologyConcept
             | has synonym | A-Environment
             | has reference | Bunge Volume 4, Definition 1.2&#10;Called A-Environment in Bunge
 
-Structure | is a kind of | BungeOntologyConcept
+Structure | is a kind of | BungeOntologyConcept | -TODO: should inherit from Property
+          | has definition | The structure of a system is the set of all the relations among its components, particularly those that hold the system together | -hasReference: Philosopical Dictionary - Enlarged Edition (M.Bunge 2003)330p 1591020379 B791.B765_2002
           | is a property of a | System
           | has a set of | Bond | -hasMultiplicity: 1..* -hasAggregation: shared
           | has reference | Bunge Volume 4, Definition 1.4&#10;Set of Bonds&#10;Called A-Structure in Bunge
 
 Bond | is a kind of | BungeOntologyConcept
+     | has definition | Two things are bonded, linked, or coupled, if there is a relation between them that makes a difference to them | -hasReference: Philosopical Dictionary - Enlarged Edition (M.Bunge 2003)330p 1591020379 B791.B765_2002
      | is a part of a | Structure
      | has an | Action
      | has a set of | Bondage | -hasMultiplicity: 1..*
