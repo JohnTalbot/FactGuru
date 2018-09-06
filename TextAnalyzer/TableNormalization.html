@@ -1,0 +1,986 @@
+<HTML><HEAD></HEAD>
+<BODY>
+
+<h1>Proposal for Text Analyzer Table Normalization</h1>
+
+<b>Author</b> : John Talbot</br>
+<b>Date</b>: April 11, 2002</br>
+<p><b>Purpose</b> : The original Text Analyzer <i>sentences</i> table should be normalized into
+as many as 11 separate tables to improve search efficiency by allowing indexing
+of patterns and words. Another issue is the scattered nature of the patterns.
+The original pattern knowledge is currently stored in three separate incompatible locations :
+<ol>
+<li>Hardcoded in the Perl scripts used for pre-processing</li>
+<li>Hardcoded in the Visual Basic 6.0 code</li>
+<li>Stored as human readable natural language pattern descriptions in the 
+    <a href="TextAnalyzerDesign.html">Text Analyzer overview documents</a></li>
+</ol>
+
+A future version of the Text Analyzer will support dynamic/on-the-fly/real-time
+pre-processing of sentences from a document or the web.
+We facilitate this by unifying and explicitly encoding all this pattern knowledge into
+related tables. This will also simplify upgrading the patterns when researchers discover more patterns.
+We can also encode or parameterize the VB6 TA pattern refinements
+procedures into tables, however this is left for a future date.</p>
+
+<h3>Normalization Procedure</h3>
+
+Currently several sentence table columns are overloaded with excessive content.
+For example, the tagged sentence column should be
+normalized into as many as five separate tables.
+Also the question type and pattern type columns can be factored
+into six separate tables.
+Each sentence has a collection of tagged words, each word has a stem, a syntactic tag and a part of speech tag.
+The relationship between sentences and tagged words is <font color="880000">Many-to-Many Bi-directional</font>;
+which can be represented using three tables : <b>sentence</b>, <b>stemmed_word</b> and <b>occurrence</b>.
+The types of syntactic tag and a part of speech tags can be factored into two separate tables :
+<b>syntactic_tag</b> and <b>part_of_speech_tag</b>. The occurrences table would hold a 
+<font color="880000">Many-to-One Unidirectional</font> relationship to each of these tables.
+Each sentence also has a set of question types and pattern types found in the sentence; this
+can be represented as two relationships tables :
+<b>sentence-pattern</b> and <b>sentence-question</b> which hold a
+<font color="880000">Many-to-Many</font> Bi-directional relationship with
+the <b>pattern</b> and <b>question</b> tables.
+The relationship between the question type and pattern type table is <font color="880000">Many-to-Many Bi-directional</font>
+and is stored in the <b>question-pattern</b> table.
+The pattern type table can be further normalized into <font color="880000">One-to-Many Unidirectional</font> relationship
+between a pattern type and the word strings that match it by creating yet another relationship table <b>pattern-patstring</b>.
+
+<h2>Advantages</h2>
+
+<ol>
+<li>The current TA search strategy has linear time performance.
+Each question/answer session for a given word performs
+a highly inefficient linear search. By normalizing the tables,
+and by creating indexes we could greatly optimize performance.</li>
+
+<li>The new table format can be transparently mapped to Enterprise JavaBeans.
+Entity beans using container managed persistence (CMP EJB) can be used 
+ to persist each table. There is a one-to-one correspondence
+between an entity bean and a table. Each table row represents
+an instance of an entity bean. The complex table joins
+and queries required to implement the relationships using raw SQL
+are handle automatically in the EJB framework as relationship fields.</li>
+</ol>
+
+<h3>References</h3>
+
+<ul>
+<li><a href="http://www.site.uottawa.ca:4321/documentation/TADesignOct15.htm">Kavanagh, J., Talbot, J., Skuce, D. : 1999, <i>The Text Analyzer</i>, LAKE Lab, University of Ottawa.</a></li>
+(id: kavanagh pass: chapters)
+</ul>
+
+<hr>
+
+<h2>Detailed Table Structure</h2>
+
+<h3>The Old Format</h3>
+
+<p>This is a row from the current <i>sentences</i> table :</p>
+
+
+<p><table border="1" cellSpacing="0" cellPadding="0">
+<tr><th colspan="12" bgcolor="#cccccc">sentences</th></tr>
+<tr><th>id</th><th>doc</th><th>Sent</th><th>Par</th><th>Head</th><th>PrevHP</th><th>List</th><th>ListHP</th><th>Sentence</th><th>tagged sentence</th><th>questions</th><th>patterns</th></tr>
+<tr><td>345</td><td>5</td><td>13</td><td>6</td><td>0</td><td>4</td><td>I</td><td>12</td><td>Conductivity is measured by an instrument called a solubridge or conductivity meter.</td>
+<td>Conductivity ~conductivity `S ^S|is ~be `X ^V|measured ~measure `V ^2|by ~by `A ^R|an ~an `D ^T|instrument ~instrument ` ^S|called ~call `V ^2|a ~a `D ^T|solubridge ~solubridge `O ^S|or ~or ` ^&|conductivity ~conductivity `O ^S|meter ~meter `O ^S|. ~ ` ^</td>
+<td>-1-4-5-</td><td>-34-67-</td></tr>
+</table></p>
+
+<h3>The New Format</h3>
+
+<ul>
+<li>The above <i>sentences</i> table can be normalized by decomposing the tagged sentence column into 4 separate tables
+  <ol>
+  <li><b>sentence</b> : The natural language sentence and structural information such as document, paragraph, header level etc...</li>
+  <li><b>stemmed_word</b> : unique list of stem words</li>
+  <li><b>occurrence</b> : implements the Many-to-Many Bidirectional relationship between a sentence and a stemmed word;
+       it contains specific occurrences of the stemmed words in the sentence and their syntactic tag and a part of speech tags</li>
+  <li><b>syntactic_tag</b> : subject, verb, etc... </li>
+  <li><b>part_of_speech_tag</b> : noun, pronoun, adjective, etc...</li>
+  </ol>
+</li>
+<li>Each table has a primary key column called id, which is a unique number within that table.
+<li>Each table has a unique colour code</li>
+<li>Tables which are not referred to are colour coded grey</li>
+<li>Relationship columns which represent foreign keys to other tables are colour coded according to table type</li>
+</ul>
+
+<p><table border="1" cellSpacing="0" cellPadding="0">
+<tr><th colspan="9" bgcolor="#FFCCCC">sentence</th></tr>
+<tr><th>id</th><th>doc</th><th>Sent</th><th>Par</th><th>Head</th><th>PrevHP</th><th>List</th><th>ListHP</th><th>content</th></tr>
+<tr><td>345</td><td>5</td><td>13</td><td>6</td><td>0</td><td>4</td><td>I</td><td>12</td><td>Conductivity is measured by an instrument called a solubridge or conductivity meter.</td></tr>
+</table></p>
+
+<p><table border="1" cellSpacing="0" cellPadding="0">
+<tr><th colspan="7" bgcolor="#cccccc">occurrence</th></tr>
+<tr><th>id</th><th bgcolor="#FFCCCC">sentence</th><th>pos</th><th>word</th><th bgcolor="#CCFFCC">stemmed_word</th><th bgcolor="#CCCCFF">syntactic_tag</th><th bgcolor="#FFFFCC">part_of_speech_tag</th></tr>
+<tr><td>567</td><td>345</td><td> 0</td><td>Conductivity</td><td> 0</td><td> 3</td><td> 8</td></tr>
+<tr><td>568</td><td>345</td><td>13</td><td>is          </td><td> 1</td><td> 1</td><td>17</td></tr>
+<tr><td>569</td><td>345</td><td>16</td><td>measured    </td><td> 2</td><td> 2</td><td>14</td></tr>
+<tr><td>570</td><td>345</td><td>25</td><td>by          </td><td> 3</td><td> 9</td><td>15</td></tr>
+<tr><td>571</td><td>345</td><td>28</td><td>an          </td><td> 4</td><td>10</td><td> 7</td></tr>
+<tr><td>572</td><td>345</td><td>21</td><td>instrument  </td><td> 5</td><td> 0</td><td> 8</td></tr>
+<tr><td>573</td><td>345</td><td>32</td><td>called      </td><td> 6</td><td> 2</td><td>14</td></tr>
+<tr><td>574</td><td>345</td><td>39</td><td>a           </td><td> 7</td><td>10</td><td> 6</td></tr>
+<tr><td>575</td><td>345</td><td>41</td><td>solubridge  </td><td> 8</td><td> 5</td><td> 8</td></tr>
+<tr><td>576</td><td>345</td><td>52</td><td>or          </td><td> 9</td><td> 0</td><td> 4</td></tr>
+<tr><td>577</td><td>345</td><td>55</td><td>conductivity</td><td>10</td><td> 5</td><td> 8</td></tr>
+<tr><td>578</td><td>345</td><td>68</td><td>meter       </td><td>11</td><td> 5</td><td> 8</td></tr>
+<tr><td>579</td><td>345</td><td>73</td><td>.           </td><td>12</td><td> 0</td><td> 0 </td></tr>
+</table></p>
+
+<p><table border="1" cellSpacing="0" cellPadding="0">
+<tr><th colspan="2" bgcolor="#CCFFCC">stemmed_word</th></tr>
+<tr><th>id</th><th>stem</th></tr>
+<tr><td>0  </td><td> conductivity</td></tr>
+<tr><td>1  </td><td> be</td></tr>
+<tr><td>2  </td><td> measure</td></tr>
+<tr><td>3  </td><td> by</td></tr>
+<tr><td>4  </td><td> an</td></tr>
+<tr><td>5  </td><td> instrument</td></tr>
+<tr><td>6  </td><td> call</td></tr>
+<tr><td>7  </td><td> a</td></tr>
+<tr><td>8  </td><td> solubridge</td></tr>
+<tr><td>9  </td><td> or</td></tr>
+<tr><td>10 </td><td> conductivity</td></tr>
+<tr><td>11 </td><td> meter</td></tr>
+<tr><td>12 </td><td> .</td></tr>
+</table></p>
+
+<p><table border="1" cellSpacing="0" cellPadding="0">
+<tr><th colspan="3" bgcolor="#CCCCFF">syntactic_tag</th></tr>
+<tr><th>id</th><th>code</th><th>tag</th></tr>
+<tr><td>0 </td><td>` </td><td>none</td></tr>
+<tr><td>1 </td><td>`X</td><td>aux. verb</td></tr>
+<tr><td>2 </td><td>`V</td><td>main verb</td></tr>
+<tr><td>3 </td><td>`S</td><td>subject</td></tr>
+<tr><td>4 </td><td>`F</td><td>formal subject</td></tr>
+<tr><td>5 </td><td>`O</td><td>direct object</td></tr>
+<tr><td>6 </td><td>`I</td><td>indirect object</td></tr>
+<tr><td>7 </td><td>`P</td><td>Pcompl-S</td></tr>
+<tr><td>8 </td><td>`p</td><td>Pcompl-O</td></tr>
+<tr><td>9 </td><td>`A</td><td>adverbial</td></tr>
+<tr><td>10</td><td>`D</td><td>determiner</td></tr>
+</table></p>
+
+<p><table border="1" cellSpacing="0" cellPadding="0">
+<tr><th colspan="3" bgcolor="#FFFFCC">part_of_speech_tag</th></tr>
+<tr><th>id</th><th>code</th><th>tag</th></tr>
+<tr><td>0 </td><td>^ </td><td>none</td></tr>
+<tr><td>1 </td><td>^A</td><td>adjective</td></tr>
+<tr><td>2 </td><td>^B</td><td>abbreviation</td></tr>
+<tr><td>3 </td><td>^D</td><td>adverb</td></tr>
+<tr><td>4 </td><td>^&</td><td>coord. conjunction</td></tr>
+<tr><td>5 </td><td>^C</td><td>subord. conjunction</td></tr>
+<tr><td>6 </td><td>^T</td><td>determiner</td></tr>
+<tr><td>7 </td><td>^I</td><td>infmark (infinitive) </td></tr>
+<tr><td>8 </td><td>^S</td><td>singular noun </td></tr>
+<tr><td>9 </td><td>^L</td><td>plural noun</td></tr>
+<tr><td>10</td><td>^G</td><td>genitive noun (possessive) </td></tr>
+<tr><td>11</td><td>^N</td><td>noun, singular or plural</td></tr>
+<tr><td>12</td><td>^#</td><td>number</td></tr>
+<tr><td>13</td><td>^1</td><td>PCP1 -ing</td></tr>
+<tr><td>14</td><td>^2</td><td>PCP2 -ed</td></tr>
+<tr><td>15</td><td>^R</td><td>preposition</td></tr>
+<tr><td>16</td><td>^P</td><td>pronoun</td></tr>
+<tr><td>17</td><td>^V</td><td>verb</td></tr>
+</table></p>
+
+<p>The questions and patterns columns of the original <i>sentences</i> tables can be decomposed into 5 tables.</p>
+
+  <ol>
+  <li><b>sentence-pattern</b> : Many-to-Many relationship between sentences and pattern types</li>
+  <li><b>sentence-question</b> : Many-to-Many relationship between sentences and question types. 
+       This table is redundant because the relationship can be inferred from the <i>sentence-pattern</i> table
+       and the <i>question-pattern</i> table as 
+       SELECT sentence FROM SENTENCE-PATTERN WHERE QUESTION-PATTERN.question=aquestion AND SENTENCE-PATTERN.pattern=QUESTION-PATTERN.pattern
+       </li>
+  <li><b>question</b> : What kinds of ____ are there? What parts does ____ have? etc...</li>
+  <li><b>pattern</b> : contains " called ", "named" or " means that ", etc...</li>
+  <li><b>question-pattern</b> : A Many-to-Many relationship between question type and pattern type</li>
+  <li><b>pattern-string</b> : A One-to-Many Unidirectional relationship between pattern type and pattern string</li>
+  </ol>
+
+<p><table border="1" cellSpacing="0" cellPadding="0">
+<tr><th colspan="4" bgcolor="#CCCCCC">sentence-pattern</th></tr>
+<tr><th>id</th><th bgcolor="#FFCCCC">sentence</th><th bgcolor="#CCFFFF">pattern</th></tr>
+<tr><td>0</td><td>345</td><td>34</td></tr>
+<tr><td>1</td><td>345</td><td>67</td></tr>
+</table></p>
+
+<p><table border="1" cellSpacing="0" cellPadding="0">
+<tr><th colspan="4" bgcolor="#CCCCCC">sentence-question</th></tr>
+<tr><th>id</th><th bgcolor="#FFCCCC">sentence</th><th bgcolor="#FFCCFF">question</th></tr>
+
+<tr><td>0</td><td>345</td><td>1</td></tr>
+<tr><td>1</td><td>345</td><td>4</td></tr>
+<tr><td>2</td><td>345</td><td>5</td></tr>
+</table></p>
+
+<p><table border="1" cellSpacing="0" cellPadding="0">
+<tr><th colspan="4" bgcolor="#FFCCFF">question</th></tr>
+<tr><th>id</th><th>code</th><th>params</th><th>type</th></tr>
+<tr><td>0 </td><td>1  </td><td>1</td><td>What is the definition of * ?</td></tr>
+<tr><td>1 </td><td>2  </td><td>1</td><td>What is a broader term(super) for * ?</td></tr>
+<tr><td>2 </td><td>3  </td><td>1</td><td>What kinds of * are there?</td></tr>
+<tr><td>3 </td><td>4  </td><td>1</td><td>What parts does * have?</td></tr>
+<tr><td>4 </td><td>5  </td><td>1</td><td>What is * a part of?</td></tr>
+<tr><td>5 </td><td>6  </td><td>2</td><td>How do I *1 a *2 ? </td></tr>
+<tr><td>6 </td><td>7  </td><td>1</td><td>What is the function of *?</td></tr>
+<tr><td>7 </td><td>8  </td><td>2</td><td>When does *1 *2 ?  or When can I *1 *2?</td></tr>
+<tr><td>8 </td><td>9a </td><td>1</td><td>What happens if * ? or What does * cause?</td></tr>
+<tr><td>9 </td><td>9b </td><td>1</td><td>What causes * ?</td></tr>
+<tr><td>10</td><td>10 </td><td>1</td><td>What does * require/support?</td></tr>
+<tr><td>11</td><td>11a</td><td>1</td><td>Where is * ?</td></tr>
+<tr><td>12</td><td>11b</td><td>1</td><td>Where does * ?</td></tr>
+</table></p>
+
+<p><table border="1" cellSpacing="0" cellPadding="0">
+<tr><th colspan="2" bgcolor="#CCFFFF">pattern</th></tr>
+<tr><th>id</th><th>words</th></tr>
+<tr><td>0  </td><td>  none</td></tr>
+<tr><td>1  </td><td>  ", that is ," or  "; that is ,"   </td></tr>
+<tr><td>2  </td><td>  " called ", "named"</td></tr>
+<tr><td>3  </td><td>  " means that "</td></tr>
+<tr><td>4  </td><td>  " is a ", " are a ", " is an ", " are an ", " are ", "was a",  "was an", "were a", "were an", "were"</td></tr>
+<tr><td>5  </td><td>  "*efinition ", " defined as "</td></tr>
+<tr><td>6  </td><td>  " are those ", " is the ", " are the ", " is any ", " are any ", "was the", "were the" ("was any", "were any", "were those" not useful)</td></tr>
+<tr><td>7  </td><td>  " term ", "termed"</td></tr>
+<tr><td>8  </td><td>  "known as" </td></tr>
+<tr><td>9  </td><td>  "refer to"  NOT USED</td></tr>
+<tr><td>10 </td><td>  " includ*"</td></tr>
+<tr><td>11 </td><td>  " types of  ", " kinds of  ", " categor*", "type of", "kind of" ,"a form of"</td></tr>
+<tr><td>12 </td><td>  " such as "</td></tr>
+<tr><td>13 </td><td>  " version of ", " versions of "</td></tr>
+<tr><td>14 </td><td>  " and other ", " or other "</td></tr>
+<tr><td>15 </td><td>  " other than "</td></tr>
+<tr><td>16 </td><td>  " especially "</td></tr>
+<tr><td>17 </td><td>  " like "</td></tr>
+<tr><td>18 </td><td>  compound nouns</td></tr>
+<tr><td>19 </td><td>  "contains", "contain","containing","contained","consists of", " consist of", "is made up of", "is composed of", "includes", "built", "is comprised of", "possess*","is contained by", "makes up", "made from","comprises", "is a constituant of", "divided into", "content*","ingredient*", "combin*", "form", "forms", "made up of"</td></tr>
+<tr><td>20 </td><td>  "is an element of", "is a component of", "is a piece of", "is a member of", "part of"</td></tr>
+<tr><td>21 </td><td>  possessive (adj) noun    look for ^G(genitive) tag</td></tr>
+<tr><td>22 </td><td>  "use", "using"</td></tr>
+<tr><td>23 </td><td>  "you", "programmer", "user"</td></tr>
+<tr><td>24 </td><td>  "know", "want", "learn", "like"</td></tr>
+<tr><td>25 </td><td>  "how to"</td></tr>
+<tr><td>26 </td><td>  "provid*", "offer*", "support*"</td></tr>
+<tr><td>27 </td><td>  "uses","using", "used", "utilize", "utilized as", "uses to which","for use in","for using in"</td></tr>
+<tr><td>28 </td><td>  "essential to","essential for","needed for"</td></tr>
+<tr><td>29 </td><td>  "function"</td></tr>
+<tr><td>30 </td><td>  "in order to" NOT USED</td></tr>
+<tr><td>31 </td><td>  "serve* as"</td></tr>
+<tr><td>32 </td><td>  "designed for"</td></tr>
+<tr><td>33 </td><td>  "among"                NOT USED</td></tr>
+<tr><td>34 </td><td>  "combin*"  NOW PART OF 19 August 5/98</td></tr>
+<tr><td>35 </td><td>  "occur* in" NOT USED</td></tr>
+<tr><td>36 </td><td>  "proportion","proportions</td></tr>
+<tr><td>37 </td><td>  "*-rich", " rich* ... in ", " high* ... in ", " low* ... in "</td></tr>
+<tr><td>38 </td><td>  "its"</td></tr>
+<tr><td>39 </td><td>  "classified as"</td></tr>
+<tr><td>40 </td><td>  "is one of", "are one of" ,", one of"  , "is one"</td></tr>
+<tr><td>41 </td><td>  "amount of", "amounts of"</td></tr>
+<tr><td>42 </td><td>  "found in", "find in", "present in","appear in","appears in","appeared in" </td></tr>
+<tr><td>43 </td><td>   "when", "while", "before", "after", "until", "time"</td></tr>
+<tr><td>44 </td><td>  "if" - part of 48 now</td></tr>
+<tr><td>45 </td><td>  infinitive</td></tr>
+<tr><td>46 </td><td>  "on", "in" ,"between", "through", "from", "at", "where", "inside", "outside, "across", "into", "along"</td></tr>
+<tr><td>47 </td><td>  support*, require*, need*, must, apply to, available for, is compatible with, maximum, minimum, only, allow, specify</td></tr>
+<tr><td>48 </td><td>  result in, results in, result from, results from, result of, results of, cause*, induce*, create*, if, when, reason*</td></tr>
+<tr><td>49 </td><td>  ", particularly ", ", and particularly ", "- particularly "</td></tr>
+<tr><td>50 </td><td>  "one of ... is ", "One of ... is " (beg. of sentence)</td></tr>
+<tr><td>51 </td><td>  " involves "</td></tr>
+<tr><td>52 </td><td>  ", in which ", "- in which " and not "which case"</td></tr>
+<tr><td>53 </td><td>  "occurs when "</td></tr>
+<tr><td>54 </td><td>  "(...)"</td></tr>
+<tr><td>55 </td><td>  ":"</td></tr>
+<tr><td>56 </td><td>  noun "in" noun</td></tr>
+<tr><td>57 </td><td>  "concentration ... in"</td></tr>
+<tr><td>58 </td><td>  "what is", "what are"</td></tr>
+<tr><td>59 </td><td>  "as a", "as an"</td></tr>
+<tr><td>60 </td><td>  "e.g", "eg"</td></tr>
+<tr><td>61 </td><td>  ", which is the", ", which is a"</td></tr>
+<tr><td>62 </td><td>  "developed to", "developed for"</td></tr>
+<tr><td>63 </td><td>  "performed to"</td></tr>
+<tr><td>64 </td><td>  "by"</td></tr>
+<tr><td>65 </td><td>  "allows"</td></tr>
+</table></p>
+
+<p>The relationship between the question and pattern table is <font color="880000">Many-to-Many Bi-directional</font>,
+and is represented as :</p>
+
+<p><table border="1" cellSpacing="0" cellPadding="0">
+<tr><th colspan="3" bgcolor="#CCCCCC">question-pattern</th></tr>
+<tr><th>id</th><th bgcolor="#FFCCFF">question</th><th bgcolor="#CCFFFF">pattern</th></tr>
+<tr><td>1 </td><td>0</td><td>1</td></tr>
+<tr><td>2 </td><td>0</td><td>2</td></tr>
+<tr><td>3 </td><td>0</td><td>3</td></tr>
+<tr><td>4 </td><td>0</td><td>4</td></tr>
+<tr><td>5 </td><td>0</td><td>5</td></tr>
+<tr><td>6 </td><td>0</td><td>6</td></tr>
+<tr><td>7 </td><td>0</td><td>7</td></tr>
+<tr><td>8 </td><td>0</td><td>8</td></tr>
+<tr><td>9 </td><td>0</td><td>40</td></tr>
+<tr><td>10</td><td>0</td><td>50</td></tr>
+<tr><td>11</td><td>0</td><td>51</td></tr>
+<tr><td>12</td><td>0</td><td>52</td></tr>
+<tr><td>13</td><td>0</td><td>53</td></tr>
+<tr><td>14</td><td>0</td><td>54</td></tr>
+<tr><td>15</td><td>0</td><td>55</td></tr>
+<tr><td>16</td><td>0</td><td>58</td></tr>
+<tr><td>17</td><td>1</td><td>2</td></tr>
+<tr><td>18</td><td>1</td><td>4</td></tr>
+<tr><td>19</td><td>1</td><td>5</td></tr>
+<tr><td>20</td><td>1</td><td>6</td></tr>
+<tr><td>21</td><td>1</td><td>7</td></tr>
+<tr><td>22</td><td>1</td><td>8</td></tr>
+<tr><td>23</td><td>1</td><td>10</td></tr>
+<tr><td>24</td><td>1</td><td>11</td></tr>
+<tr><td>25</td><td>1</td><td>12</td></tr>
+<tr><td>26</td><td>1</td><td>14</td></tr>
+<tr><td>27</td><td>1</td><td>15</td></tr>
+<tr><td>28</td><td>1</td><td>16</td></tr>
+<tr><td>29</td><td>1</td><td>17</td></tr>
+<tr><td>30</td><td>1</td><td>39</td></tr>
+<tr><td>31</td><td>1</td><td>40</td></tr>
+<tr><td>32</td><td>1</td><td>49</td></tr>
+<tr><td>33</td><td>1</td><td>50</td></tr>
+<tr><td>34</td><td>1</td><td>54</td></tr>
+<tr><td>35</td><td>1</td><td>55</td></tr>
+<tr><td>36</td><td>1</td><td>59</td></tr>
+<tr><td>37</td><td>1</td><td>60</td></tr>
+<tr><td>38</td><td>1</td><td>61</td></tr>
+<tr><td>39</td><td>2</td><td>4</td></tr>
+<tr><td>40</td><td>2</td><td>6</td></tr>
+<tr><td>41</td><td>2</td><td>10</td></tr>
+<tr><td>42</td><td>2</td><td>11</td></tr>
+<tr><td>43</td><td>2</td><td>12</td></tr>
+<tr><td>44</td><td>2</td><td>13</td></tr>
+<tr><td>45</td><td>2</td><td>14 </td></tr>
+<tr><td>46</td><td>2</td><td>15</td></tr>
+<tr><td>47</td><td>2</td><td>16</td></tr>
+<tr><td>48</td><td>2</td><td>17</td></tr>
+<tr><td>49</td><td>2</td><td>18</td></tr>
+<tr><td>50</td><td>2</td><td>39</td></tr>
+<tr><td>51</td><td>2</td><td>40</td></tr>
+<tr><td>52</td><td>2</td><td>49</td></tr>
+<tr><td>53</td><td>2</td><td>50</td></tr>
+<tr><td>54</td><td>2</td><td>59</td></tr>
+<tr><td>55</td><td>2</td><td>60</td></tr>
+<tr><td>56</td><td>2</td><td>61</td></tr>
+<tr><td>57</td><td>3</td><td>19</td></tr>
+<tr><td>58</td><td>3</td><td>20</td></tr>
+<tr><td>59</td><td>3</td><td>21</td></tr>
+<tr><td>60</td><td>3</td><td>36</td></tr>
+<tr><td>61</td><td>3</td><td>37</td></tr>
+<tr><td>62</td><td>3</td><td>38</td></tr>
+<tr><td>63</td><td>3</td><td>41</td></tr>
+<tr><td>64</td><td>3</td><td>42</td></tr>
+<tr><td>65</td><td>4</td><td>19</td></tr>
+<tr><td>66</td><td>4</td><td>20</td></tr>
+<tr><td>67</td><td>4</td><td>21</td></tr>
+<tr><td>68</td><td>4</td><td>36</td></tr>
+<tr><td>69</td><td>4</td><td>37</td></tr>
+<tr><td>70</td><td>4</td><td>38</td></tr>
+<tr><td>71</td><td>4</td><td>41</td></tr>
+<tr><td>72</td><td>4</td><td>42</td></tr>
+<tr><td>73</td><td>5</td><td>22</td></tr>
+<tr><td>74</td><td>5</td><td>23</td></tr>
+<tr><td>75</td><td>5</td><td>24</td></tr>
+<tr><td>76</td><td>5</td><td>25</td></tr>
+<tr><td>77</td><td>5</td><td>45</td></tr>
+<tr><td>78</td><td>6</td><td>26</td></tr>
+<tr><td>79</td><td>6</td><td>27</td></tr>
+<tr><td>70</td><td>6</td><td>28</td></tr>
+<tr><td>71</td><td>6</td><td>29</td></tr>
+<tr><td>72</td><td>6</td><td>31</td></tr>
+<tr><td>73</td><td>6</td><td>32</td></tr>
+<tr><td>74</td><td>6</td><td>62</td></tr>
+<tr><td>75</td><td>6</td><td>63</td></tr>
+<tr><td>76</td><td>6</td><td>64</td></tr>
+<tr><td>77</td><td>6</td><td>65</td></tr>
+<tr><td>78</td><td>7</td><td>43</td></tr>
+<tr><td>79</td><td>8</td><td>48</td></tr>
+<tr><td>80</td><td>9</td><td>47</td></tr>
+<tr><td>81</td><td>10</td><td>46</td></tr>
+</table></p>
+
+<p>
+The pattern table can be further normalized into <font color="880000">One-to-Many Unidirectional</font> relationship
+between a pattern type and the word strings that match it.
+Quotes are not included in the table, they are used to highlight required spaces.</p>
+
+<p><table border="1" cellSpacing="0" cellPadding="0">
+<tr><th colspan="3" bgcolor="#CCCCCC">pattern-patstring</th></tr>
+<tr><th>id</th><th bgcolor="#CCFFFF">pattern</th><th>patstring</th></tr>
+      
+<tr><td>0  </td><td>0 </td><td>none</td></tr>
+<tr><td>1  </td><td>1 </td><td>", that is ,"</td></tr>
+<tr><td>2  </td><td>1 </td><td>"; that is ,"   </td></tr>
+<tr><td>3  </td><td>2 </td><td>" called "</td></tr>
+<tr><td>4  </td><td>2 </td><td>"named"</td></tr>
+<tr><td>5  </td><td>3 </td><td>" means that "</td></tr>
+<tr><td>6  </td><td>4 </td><td>" is a "</td></tr>
+<tr><td>7  </td><td>4 </td><td>" are a "</td></tr>
+<tr><td>8  </td><td>4 </td><td>" is an "</td></tr>
+<tr><td>9  </td><td>4 </td><td>" are an "</td></tr>
+<tr><td>10 </td><td>4 </td><td>" are "</td></tr>
+<tr><td>11 </td><td>4 </td><td>"was a"</td></tr>
+<tr><td>12 </td><td>4 </td><td>"was an"</td></tr>
+<tr><td>13 </td><td>4 </td><td>"were a"</td></tr>
+<tr><td>14 </td><td>4 </td><td>"were an"</td></tr>
+<tr><td>15 </td><td>4 </td><td>"were"</td></tr>
+<tr><td>16 </td><td>5 </td><td>"*efinition "</td></tr>
+<tr><td>17 </td><td>5 </td><td>" defined as "</td></tr>
+<tr><td>18 </td><td>6 </td><td>" are those "</td></tr>
+<tr><td>19 </td><td>6 </td><td>" is the "</td></tr>
+<tr><td>20 </td><td>6 </td><td>" are the "</td></tr>
+<tr><td>21 </td><td>6 </td><td>" is any "</td></tr>
+<tr><td>22 </td><td>6 </td><td>" are any "</td></tr>
+<tr><td>23 </td><td>6 </td><td>"was the"</td></tr>
+<tr><td>24 </td><td>6 </td><td>"were the"</td></tr>
+<tr><td>25 </td><td>7 </td><td>" term "</td></tr>
+<tr><td>26 </td><td>7 </td><td>"termed"</td></tr>
+<tr><td>27 </td><td>8 </td><td>"known as" </td></tr>
+<tr><td>28 </td><td>9 </td><td>"refer to"</td></tr>
+<tr><td>29 </td><td>10</td><td>" includ*"</td></tr>
+<tr><td>30 </td><td>11</td><td>" types of  "</td></tr>
+<tr><td>31 </td><td>11</td><td>" kinds of  "</td></tr>
+<tr><td>32 </td><td>11</td><td>" categor*"</td></tr>
+<tr><td>33 </td><td>11</td><td>"type of"</td></tr>
+<tr><td>34 </td><td>11</td><td>"kind of"</td></tr>
+<tr><td>35 </td><td>11</td><td>"a form of"</td></tr>
+<tr><td>36 </td><td>12</td><td>" such as "</td></tr>
+<tr><td>37 </td><td>13</td><td>" version of "</td></tr>
+<tr><td>38 </td><td>13</td><td>" versions of "</td></tr>
+<tr><td>39 </td><td>14</td><td>" and other "</td></tr>
+<tr><td>40 </td><td>14</td><td>" or other "</td></tr>
+<tr><td>41 </td><td>15</td><td>" other than "</td></tr>
+<tr><td>42 </td><td>16</td><td>" especially "</td></tr>
+<tr><td>43 </td><td>17</td><td>" like "</td></tr>
+<tr><td>44 </td><td>18</td><td>...</td></tr>
+<tr><td>45 </td><td>19</td><td>"contains"</td></tr>
+<tr><td>46 </td><td>19</td><td>"contain"</td></tr>
+<tr><td>47 </td><td>19</td><td>"containing"</td></tr>
+<tr><td>48 </td><td>19</td><td>"contained"</td></tr>
+<tr><td>49 </td><td>19</td><td>"consists of"</td></tr>
+<tr><td>50 </td><td>19</td><td>" consist of"</td></tr>
+<tr><td>51 </td><td>19</td><td>"is made up of"</td></tr>
+<tr><td>52 </td><td>19</td><td>"is composed of"</td></tr>
+<tr><td>53 </td><td>19</td><td>"includes"</td></tr>
+<tr><td>54 </td><td>19</td><td>"built"</td></tr>
+<tr><td>55 </td><td>19</td><td>"is comprised of"</td></tr>
+<tr><td>56 </td><td>19</td><td>"possess*"</td></tr>
+<tr><td>57 </td><td>19</td><td>"is contained by"</td></tr>
+<tr><td>58 </td><td>19</td><td>"makes up"</td></tr>
+<tr><td>59 </td><td>19</td><td>"made from"</td></tr>
+<tr><td>60 </td><td>19</td><td>"comprises"</td></tr>
+<tr><td>61 </td><td>19</td><td>"is a constituant of"</td></tr>
+<tr><td>62 </td><td>19</td><td>"divided into"</td></tr>
+<tr><td>63 </td><td>19</td><td>"content*"</td></tr>
+<tr><td>64 </td><td>19</td><td>"ingredient*"</td></tr>
+<tr><td>65 </td><td>19</td><td>"combin*"</td></tr>
+<tr><td>66 </td><td>19</td><td>"form"</td></tr>
+<tr><td>67 </td><td>19</td><td>"forms"</td></tr>
+<tr><td>68 </td><td>19</td><td>"made up of"</td></tr>
+<tr><td>69 </td><td>20</td><td>"is an element of"</td></tr>
+<tr><td>70 </td><td>20</td><td>"is a component of"</td></tr>
+<tr><td>71 </td><td>20</td><td>"is a piece of"</td></tr>
+<tr><td>72 </td><td>20</td><td>"is a member of"</td></tr>
+<tr><td>73 </td><td>20</td><td>"part of"</td></tr>
+<tr><td>74 </td><td>21</td><td>...</td></tr>
+<tr><td>75 </td><td>22</td><td>"use"</td></tr>
+<tr><td>76 </td><td>22</td><td>"using"</td></tr>
+<tr><td>77 </td><td>23</td><td>"you"</td></tr>
+<tr><td>78 </td><td>23</td><td>"programmer"</td></tr>
+<tr><td>79 </td><td>23</td><td>"user"</td></tr>
+<tr><td>80 </td><td>24</td><td>"know"</td></tr>
+<tr><td>81 </td><td>24</td><td>"want"</td></tr>
+<tr><td>82 </td><td>24</td><td>"learn"</td></tr>
+<tr><td>83 </td><td>24</td><td>"like"</td></tr>
+<tr><td>84 </td><td>25</td><td>"how to"</td></tr>
+<tr><td>85 </td><td>26</td><td>"provid*"</td></tr>
+<tr><td>86 </td><td>26</td><td>"offer*"</td></tr>
+<tr><td>87 </td><td>26</td><td>"support*"</td></tr>
+<tr><td>88 </td><td>27</td><td>"uses"</td></tr>
+<tr><td>89 </td><td>27</td><td>"using"</td></tr>
+<tr><td>90 </td><td>27</td><td>"used"</td></tr>
+<tr><td>91 </td><td>27</td><td>"utilize"</td></tr>
+<tr><td>92 </td><td>27</td><td>"utilized as"</td></tr>
+<tr><td>93 </td><td>27</td><td>"uses to which"</td></tr>
+<tr><td>94 </td><td>27</td><td>"for use in"</td></tr>
+<tr><td>95 </td><td>27</td><td>"for using in"</td></tr>
+<tr><td>96 </td><td>28</td><td>"essential to"</td></tr>
+<tr><td>97 </td><td>28</td><td>"essential for"</td></tr>
+<tr><td>98 </td><td>28</td><td>"needed for"</td></tr>
+<tr><td>99 </td><td>29</td><td>"function"</td></tr>
+<tr><td>100</td><td>30</td><td>"in order to"</td></tr>
+<tr><td>101</td><td>31</td><td>"serve* as"</td></tr>
+<tr><td>102</td><td>32</td><td>"designed for"</td></tr>
+<tr><td>103</td><td>33</td><td>"among"</td></tr>
+<tr><td>104</td><td>34</td><td>"combin*"</td></tr>
+<tr><td>105</td><td>35</td><td>"occur* in"</td></tr>
+<tr><td>106</td><td>36</td><td>"proportion"</td></tr>
+<tr><td>107</td><td>36</td><td>"proportions</td></tr>
+<tr><td>108</td><td>37</td><td>"*-rich"</td></tr>
+<tr><td>109</td><td>37</td><td>" rich* ... in "</td></tr>
+<tr><td>110</td><td>37</td><td>" high* ... in "</td></tr>
+<tr><td>111</td><td>37</td><td>" low* ... in "</td></tr>
+<tr><td>112</td><td>38</td><td>"its"</td></tr>
+<tr><td>113</td><td>39</td><td>"classified as"</td></tr>
+<tr><td>114</td><td>40</td><td>"is one of"</td></tr>
+<tr><td>115</td><td>40</td><td>"are one of"</td></tr>
+<tr><td>116</td><td>40</td><td>", one of"</td></tr>
+<tr><td>117</td><td>40</td><td>"is one"</td></tr>
+<tr><td>118</td><td>41</td><td>"amount of"</td></tr>
+<tr><td>119</td><td>41</td><td>"amounts of"</td></tr>
+<tr><td>120</td><td>42</td><td>"found in"</td></tr>
+<tr><td>121</td><td>42</td><td>"find in"</td></tr>
+<tr><td>122</td><td>42</td><td>"present in"</td></tr>
+<tr><td>123</td><td>42</td><td>"appear in"</td></tr>
+<tr><td>124</td><td>42</td><td>"appears in"</td></tr>
+<tr><td>125</td><td>42</td><td>"appeared in" </td></tr>
+<tr><td>126</td><td>43</td><td>"when"</td></tr>
+<tr><td>127</td><td>43</td><td>"while"</td></tr>
+<tr><td>128</td><td>43</td><td>"before"</td></tr>
+<tr><td>129</td><td>43</td><td>"after"</td></tr>
+<tr><td>130</td><td>43</td><td>"until"</td></tr>
+<tr><td>131</td><td>43</td><td>"time"</td></tr>
+<tr><td>132</td><td>44</td><td>"if"</td></tr>
+<tr><td>133</td><td>45</td><td>...</td></tr>
+<tr><td>134</td><td>46</td><td>"on"</td></tr>
+<tr><td>135</td><td>46</td><td>"in"</td></tr>
+<tr><td>136</td><td>46</td><td>"between"</td></tr>
+<tr><td>137</td><td>46</td><td>"through"</td></tr>
+<tr><td>138</td><td>46</td><td>"from"</td></tr>
+<tr><td>139</td><td>46</td><td>"at"</td></tr>
+<tr><td>140</td><td>46</td><td>"where"</td></tr>
+<tr><td>141</td><td>46</td><td>"inside"</td></tr>
+<tr><td>142</td><td>46</td><td>"outside"</td></tr>
+<tr><td>143</td><td>46</td><td>"across"</td></tr>
+<tr><td>144</td><td>46</td><td>"into"</td></tr>
+<tr><td>145</td><td>46</td><td>"along"</td></tr>
+<tr><td>146</td><td>47</td><td>support*"</td></tr>
+<tr><td>147</td><td>47</td><td>"require*"</td></tr>
+<tr><td>148</td><td>47</td><td>"need*"</td></tr>
+<tr><td>149</td><td>47</td><td>"must"</td></tr>
+<tr><td>150</td><td>47</td><td>"apply to"</td></tr>
+<tr><td>151</td><td>47</td><td>"available for"</td></tr>
+<tr><td>152</td><td>47</td><td>"is compatible with"</td></tr>
+<tr><td>153</td><td>47</td><td>"maximum"</td></tr>
+<tr><td>154</td><td>47</td><td>"minimum"</td></tr>
+<tr><td>155</td><td>47</td><td>"only"</td></tr>
+<tr><td>156</td><td>47</td><td>"allow"</td></tr>
+<tr><td>157</td><td>47</td><td>"specify"</td></tr>
+<tr><td>158</td><td>48</td><td>"result in"</td></tr>
+<tr><td>159</td><td>48</td><td>"results in"</td></tr>
+<tr><td>160</td><td>48</td><td>"result from"</td></tr>
+<tr><td>161</td><td>48</td><td>"results from"</td></tr>
+<tr><td>162</td><td>48</td><td>"result of"</td></tr>
+<tr><td>163</td><td>48</td><td>"results of"</td></tr>
+<tr><td>164</td><td>48</td><td>"cause*"</td></tr>
+<tr><td>165</td><td>48</td><td>"induce*"</td></tr>
+<tr><td>166</td><td>48</td><td>"create*"</td></tr>
+<tr><td>167</td><td>48</td><td>"if"</td></tr>
+<tr><td>168</td><td>48</td><td>"when"</td></tr>
+<tr><td>169</td><td>48</td><td>"reason*"</td></tr>
+<tr><td>170</td><td>49</td><td>", particularly "</td></tr>
+<tr><td>171</td><td>49</td><td>", and particularly "</td></tr>
+<tr><td>172</td><td>49</td><td>"- particularly "</td></tr>
+<tr><td>173</td><td>50</td><td>"one of ... is "</td></tr>
+<tr><td>174</td><td>50</td><td>"One of ... is "</td></tr>
+<tr><td>175</td><td>51</td><td>" involves "</td></tr>
+<tr><td>176</td><td>52</td><td>", in which "</td></tr>
+<tr><td>177</td><td>52</td><td>"- in which "</td></tr>
+<tr><td>178</td><td>53</td><td>"occurs when "</td></tr>
+<tr><td>179</td><td>54</td><td>"(...)"</td></tr>
+<tr><td>180</td><td>55</td><td>":"</td></tr>
+<tr><td>181</td><td>56</td><td>"in"</td></tr>
+<tr><td>182</td><td>57</td><td>"concentration ... in"</td></tr>
+<tr><td>183</td><td>58</td><td>"what is"</td></tr>
+<tr><td>184</td><td>58</td><td>"what are"</td></tr>
+<tr><td>185</td><td>59</td><td>"as a"</td></tr>
+<tr><td>186</td><td>59</td><td>"as an"</td></tr>
+<tr><td>187</td><td>60</td><td>"e.g"</td></tr>
+<tr><td>188</td><td>60</td><td>"eg"</td></tr>
+<tr><td>189</td><td>61</td><td>", which is the"</td></tr>
+<tr><td>190</td><td>61</td><td>", which is a"</td></tr>
+<tr><td>191</td><td>62</td><td>"developed to"</td></tr>
+<tr><td>192</td><td>62</td><td>"developed for"</td></tr>
+<tr><td>193</td><td>63</td><td>"performed to"</td></tr>
+<tr><td>194</td><td>64</td><td>"by"</td></tr>
+<tr><td>195</td><td>65</td><td>"allows"</td></tr>
+</table></p>
+
+<h2>Mapping to Enterprise JavaBeans</h2>
+
+<p>Using Enterprise JavaBeans, 8 of the normalized Text Analyzer tables can be
+represented as entity beans and 3 of the tables become container managed relation fields.
+CMP fields are container managed persistence fields and
+CMR fields are container managed relationship fields.
+An entity bean represents a row in a table.
+Some of the relationship tables are not directly represented
+as entity beans but are instead implemented using CMR fields.
+All primary key fields (id column) are container managed, 
+i.e. they are implicitely handled by the container.
+</p>
+
+Here are the 8 tables which map directly to Entity beans :
+
+
+<p><font color="880000"><i><u>High traffic tables</u></i></font> : The following tables are updated with a very high frequency and also require the most resources.
+Care should be taken when deploying the enterprise application that these tables get mapped to a separate
+database tablespace on a separate disk partition or better still, on a dedicated high speed hard drive.
+The relationship tables which map to these Entities should also be considered high traffic.
+</p>
+  <ol>
+  <li><b>Sentence</b>
+  <li><b>StemmedWord</b>
+  <li><b>Occurrence</b>
+  </ol>
+<p><font color="008800"><i><u>Low traffic tables</u></i></font> : Tables which are updated with a very low frequency.
+These very small tables should be placed in a tablespace separate from the high traffic tables.
+Better still, these tables should be permanently memory cached.</p>
+  <ol>
+  <li><b>SyntacticTag</b>
+  <li><b>PartOfSpeechTag</b>
+  <li><b>Question</b>
+  <li><b>Pattern</b>
+  <li><b>PatternString</b>
+  </ol>
+<p>The relationships between tables are sometimes also represented as other tables,
+however when using Enterprise JavaBeans some of these tables are automatically
+managed by the EJB container. Here are the 3 tables which map to container
+managed relationship fields :</p>
+
+  <ul>
+  <li><b>sentence-pattern</b> : The Many-to-Many bi-directional relationship between Sentence and Pattern is represented
+      as two CMR fields; getSentences() in Pattern and getPatterns() in Sentence.</li>
+  <li><b>sentence-question</b> : The Many-to-Many bi-directionalrelationship between Sentence and Pattern types is represented
+      as two CMR fields; getSentences() in Question and getQuestions() in Sentence.</li>
+  <li><b>question-pattern</b> : The Many-to-Many bi-directional relationship between Question and Pattern is represented
+      as two CMR fields; getQuestions() in Patterns and getPatterns() in Question. </li>
+  </ul>
+<hr>
+
+<h3>Pre-processor Information Loss</h3>
+
+<p>One issues that has to be resolved is the information loss when the pre-processor tags the <i>Sentence</i> with
+<i>Pattern</i> numbers. Information such as the position of the <i>PatternString</i> within the <i>Sentence</i> is critical
+during pattern refinement because it is required when determining that the proximity of the search word
+is within positional tolerance. We recommend including the pattern position, also we recommend
+storing a reference to the exact <i>PatternString</i> instead of the more general <i>Pattern</i>.</p>
+
+To implement this change, the <b>sentence-pattern</b> and <b>sentence-question</b> relationships can be replaced
+with a new Entity bean called <b>SentencePatternString</b> containing the position of a <i>PatternString</i> within the <i>Sentence</i>.
+This improves the precision of knowledge of the position and defines the exact <i>PatternString</i> found in the <i>Sentence</i>
+as opposed to just associating a series of <i>Pattern</i> references with the <i>Sentence</i>. To find a <i>Sentence</i>
+that matches the <i>Question</i> type and search string we can replace the pattern refinement procedure with a
+container managed persistence finder method. The proximity of the search string to the <i>PatternString</i>
+can be determined using the procedure :
+
+<ul>
+<li>Select <i>Sentences</i> belonging to <i>Question</i> type</li>
+<li>Select <i>Occurrences</i> belonging to <i>Sentences</i></li>
+<li>Select <i>SentencePatternStrings</i> belonging to <i>Sentences</i></li>
+<li><i>Occurrence</i> must match the searchString</li>
+<li>The <i>Pattern</i> of the <i>PatternString</i> of the <i>SentencePatternString</i> must belong to the <i>Question</i> type
+    because not all <i>SentencePatternStrings</i> associated with a <i>Sentence</i>
+    belong to the specified <i>Question</i>.</li>
+<li><i>Occurrence</i> position must be within the given tolerance of <i>PatternString</i> position
+    stored in <i>SentencePatternString</i></li>
+</ul>
+
+This procedure can be encoded using following EJB-QL statement (portable Query language for Enterprise JavaBeans) :
+With the following three parameters :
+
+<p>abstract Collection findSentences(Question <b>question</b>, String <b>searchString</b>, int <b>tolerance</b>);</p>
+
+<ol>
+<li><b>question</b> : the <i>Question</i> type</li>
+<li><b>searchString</b> : the search string</li>
+<li><b>tolerance</b> : the maximum number of characters that search word can be located from the <i>PatternString</i></li>
+</ol>
+
+<pre>
+SELECT OBJECT(s) FROM 
+  IN(Question.sentences) as s,
+  IN(s.occurrences) as o
+  IN(s.sentencePatternStrings) as sps,
+WHERE 
+  Question = ?1 AND 
+  o.word = ?2 AND 
+  sps.patternString.pattern MEMBER OF Question.patterns AND
+  ABS(o.position - sps.position) < ?3
+</pre>
+
+<h3>Concordance</h3>
+
+A concordance on a single word search string is efficiently performed using the
+following finder method :
+
+<p>abstract Collection findSentences(String <b>searchString</b>);</p>
+
+<pre>
+SELECT DISTINCT OBJECT(s) FROM 
+  Occurrence AS o, 
+  o.sentence AS s 
+WHERE
+  o.word = ?1
+</pre>
+
+Unfortunately, the <i>Occurrence</i> table only stores single words.
+This leads to efficiency problems when the search string is a compound term.
+For a two word compound term the search procedure becomes very inefficient and complicated :</p>
+
+<p>abstract Collection findSentences(String <b>searchString1</b>, String <b>searchString2</b>);</p>
+
+<pre>
+SELECT DISTINCT OBJECT(s) FROM 
+  Sentence AS s,
+  IN(s.occurrences) AS o1,
+  IN(s.occurrences) AS o2
+WHERE
+  o1.word = ?1 AND
+  o2.word = ?2 AND
+  o1.position + LENGHT(o1.word) + 1 = o2.position
+</pre>
+
+If a sentence had 10 words this query would require 100 comparisons.
+This could be cut in half by adding the following where clause : o1.position > o2.position.
+However, the procedure efficiency remain of order O(n<sup>2</sup>) where <i>n</i> is the number of words in the sentence.
+Not good. Another problem that might arise in certain scenarios is that more than one space might
+be between the members of the compound term. This could be fixed by adding more clauses.
+Further research into how commercial search engines deal with the problem of compound terms would be beneficial.
+
+
+<h2>Source Code</h2>
+
+<pre>
+
+  /** Java 2 Enterprise Edition version 1.3 representation of Text Analyzer data.
+   * @author John Talbot
+   */
+  public abstract class Sentence implements EntityBean {
+    // Container managed persistence fields (CMP)
+    public abstract void setDocument(int aDocument);
+    public abstract int getDocument();
+
+    public abstract void setSentenceNumber(int aSentenceNumber);
+    public abstract int getSentenceNumber();
+
+    public abstract void setParagraph(int aParagraph);
+    public abstract int getParagraph();
+
+    public abstract void setHeaderLevel(int aHeaderLevel);
+    public abstract int getHeaderLevel();
+
+    public abstract void setPreviousHeader(int aPreviousHeader);
+    public abstract int getPreviousHeader();
+
+    public abstract void setList(String aList);
+    public abstract String getList();
+
+    public abstract void setListHeader(int aListHeader);
+    public abstract int getListHeader();
+
+    /** The sentence content (the original sentence stripped of HTML). */
+    public abstract void setContent(String aContent);
+    public abstract String getContent();
+
+    // CMR fields
+
+    /** One-to-many, bi-directional relationship containing Occurrence entities */
+    public abstract void setOccurrences(Collection someOccurrences);
+    public abstract Collection getOccurrences();
+
+    /** Many-to-many, bi-directional relationship containing Pattern entities */
+    public abstract void setPatterns(Collection somePatterns);
+    public abstract Collection getPatterns();
+
+    /** Many-to-many, bi-directional relationship containing Question entities */
+    public abstract void setQuestions(Collection someQuestions);
+    public abstract Collection getQuestions();
+
+    /** Many-to-many, bi-directional relationship containing SentencePatternString entities */
+    public abstract void setSentencePatternStrings(Collection someSentencePatternStrings);
+    public abstract Collection getSentencePatternStrings();
+
+
+  }
+
+  public abstract class StemmedWord implements EntityBean {
+    // CMP fields
+    /** Stemmed version of the word. */
+    public abstract void setStem(String aStem);
+    public abstract String getStem();
+
+    // CMR fields
+    /** one-to-many, bi-directional relationship containing Occurrence entities */
+    public abstract void setOccurrences(Collection aSetOfOccurrences);
+    public abstract Collection getOccurrences();
+  }
+
+  /** The Occurrence entity bean implements the many-to-many relationship
+   * between the Sentence and StemmedWord entity beans.
+   * Normally we would use a Many-to-Many CMR field in the Sentence EJB,
+   * however we need to add extra information such as syntactic and
+   * part of speech tags, position in sentence and word (non-stemmed version).
+   * Therefore we create an explicit representation of the relationship.
+   * This entity is cascade deleted when Sentence is deleted (is this possible?)
+   */
+  public abstract class Occurrence implements EntityBean {
+    // CMP fields
+
+    /** Position of the word in the sentence. */
+    public abstract void setPosition(int aPosition);
+    public abstract int getPosition();
+
+    /** Unstemmed version of the word. For each stemmed word there exists one
+     * or more unstemmed words which correspond to different forms of the word
+     * such as singular/plural for nouns or past/present tense for verbs etc...
+     */
+    public abstract void setWord(String aWord);
+    public abstract String getWord();
+
+    // CMR fields
+
+    /** Many-to-one, bi-directional relationship to a Sentence */
+    public abstract void setSentence(Sentence aSentence);               
+    public abstract Sentence getSentence();
+
+    /** Many-to-one, bi-directional relationship to a StemmedWord */
+    public abstract void setStemmedWord(StemmedWord aStemmedWord);        
+    public abstract StemmedWord getStemmedWord();
+
+    /** Many-to-one, bi-directional relationship to a SyntacticTag */
+    public abstract void setSyntacticTag(SyntacticTag aSyntacticTag);       
+    public abstract SyntacticTag getSyntacticTag();
+
+    /** Many-to-one, bi-directional relationship to a PartOfSpeechTag */
+    public abstract void setPartOfSpeechTag(PartOfSpeechTag aPartOfSpeechTag);
+    public abstract PartOfSpeechTag getPartOfSpeechTag();
+
+  }
+
+  public abstract class SyntacticTag implements EntityBean {
+    // CMP fields
+    /** A code used in external programs to mark the word as having the tag */
+    public abstract void setCode(String aCode);
+    public abstract String getCode();
+
+    /** The meaning of the tag in natural language */
+    public abstract void setTag(String aTag);
+    public abstract String getTag();
+
+    // CMR fields
+
+    /** One-to-many, bi-directional container managed relationship field
+     * containing Occurrence as collection members.
+     */
+    public abstract void setOccurrences(Collection aSetOfOccurrences);
+    public abstract Collection getOccurrences();  
+  }
+
+  public abstract class PartOfSpeechTag implements EntityBean {
+    // CMP fields
+    /** A code used in external programs to mark the word as having the tag */
+    public abstract void setCode(String aCode);
+    public abstract String getCode();
+
+    /** The meaning of the tag in natural language */
+    public abstract void setTag(String aTag);
+    public abstract String getTag();
+
+    // CMR fields
+
+    /** One-to-many, bi-directional relationship to Occurrence entities. */
+    public abstract void setOccurrences(Collection aSetOfOccurrences);
+    public abstract Collection getOccurrences();  
+  }
+
+  public abstract class Question implements EntityBean {
+    // CMP fields
+    /** A code used in external programs to mark a sentence as answering the question type */
+    public abstract void setCode(String aCode);
+    public abstract String getCode();
+
+    /** The number of parameter that this question requires. */
+    public abstract void setParameters(int aNumberOfParameters);
+    public abstract int getParameters();
+
+    /** The meaning of the question in natural language */
+    public abstract void setType(String aType);
+    public abstract String getType();
+
+    // CMR fields
+    /** One-to-many, bi-directional relationship to Sentence entities. */
+    public abstract void setSentences(Collection aSetOfSentences);
+    public abstract Collection getSentences();
+
+    /** Many-to-one, bi-directional relationship to Pattern entities */
+    public abstract void setPatterns(Collection aSetOfPatterns);
+    public abstract Collection getPatterns();
+  }
+
+  public abstract class Pattern implements EntityBean {
+    // CMP fields
+    /** A comma separated set of PatternString */
+    public abstract void setWords(String aPatternStringWords);
+    public abstract String getWords();
+
+    // CMR fields
+
+    /** One-to-many, bi-directional relationship to Sentence entities. */
+    public abstract void setSentences(Collection aSetOfSentences);
+    public abstract Collection getSentences();
+
+    /** Many-to-many, bi-directional relationship to Question entities */ 
+    public abstract void setQuestions(Collection aSetOfQuestions);
+    public abstract Collection getQuestions();
+
+    /** One-to-many, bi-directional relationship to PatternString entities */ 
+    public abstract void setPatternStrings(Collection aSetOfPatternStrings);
+    public abstract Collection getPatternStrings();
+
+  }
+
+  public abstract class PatternString implements EntityBean {
+    // CMP fields
+    public abstract void setPatternString(String aPatternString);
+    public abstract String getPatternString();
+
+    // CMR fields
+
+    /** One-to-many, bi-directional relationship to a Pattern. */
+    public abstract void setPattern(Pattern aPattern);  
+    public abstract Pattern getPattern();
+
+    /** One-to-many, bi-directional relationship to a SentencePatternString. */
+    public abstract void setSentencePatternString(Collection aSentencePatternString);  
+    public abstract Collection getSentencePatternString();
+
+  }
+
+  public abstract class SentencePatternString implements EntityBean {
+    // CMP fields
+    /** Position of the PatternString within the sentence. */
+    public abstract void setPosition(String aPosition);
+    public abstract String getPosition();
+
+    // CMR fields
+
+    /** Many-to-One, bi-directional relationship to a PatternString. */
+    public abstract void setPatternString(PatternString aPatternString);  
+    public abstract PatternString getPatternString();
+
+    /** One-to-many, bi-directional relationship to a Sentence. */
+    public abstract void setSentence(Sentence aSentence);
+    public abstract Sentence getSentence();
+  }
+
+
+</pre>
+
+</BODY></HTML>
