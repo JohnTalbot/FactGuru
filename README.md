@@ -19,6 +19,6 @@ The knowledge bases created by the framework are designed to be interoperable wi
 This program and its accompanying suite of tools and libraries are Copyleft as defined by the [Free Software Foundation](https://www.fsf.org).
 It is distributed under the terms of the GNU General Public License Version 3 or any later version ([GPL-3.0-or-later](http://www.gnu.org/licenses/licenses.html)).
 
-Copyright &copy; 2018 [John Talbot](https://www.linkedin.com/in/john-talbot-factguru/).
+Copyleft 2018 [John Talbot](https://www.linkedin.com/in/john-talbot-factguru/).
 
 Distributed under the terms of the GNU General Public License [version 3](http://www.gnu.org/licenses/licenses.html) or any later version.
